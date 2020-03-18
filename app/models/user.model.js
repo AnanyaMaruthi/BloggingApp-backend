@@ -59,7 +59,7 @@ User.findUserById = function(user_id, result) {
         console.log("Error getting user: ", err);
         result(err, null);
       } else {
-        console.log("Fetched users");
+        console.log("Fetched user");
         result(null, res);
       }
     }
@@ -79,7 +79,7 @@ User.patchUser = function(user_id, user, result) {
       } else {
         console.log("Successfully updated user");
         let responseMessage = {
-          message: "Successfully inserted user"
+          message: "Successfully updated user"
         };
         result(null, responseMessage);
       }
