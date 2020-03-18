@@ -1,24 +1,19 @@
-// import controller here
+let userController = require("../controllers/user.controller");
 
 let routes = app => {
   app
     .route("/api/v1/users")
-    .get((req, res) => {
-      res.send("/api/v1/users");
-    })
-    .post();
+    .get(userController.getAllUsers)
+    .post(userController.insertUser);
 
   app.route("/api/v1/users/search").get();
 
   app
     .route("/api/v1/users/:userId")
-    .get
-    // Get profile info and personal page
-    // Alternatively do every post must be associated with a collection -> no personal page
-    ()
+    .get(userController.findUserById)
     .put()
-    .patch()
-    .delete();
+    .patch(userController.updateUser)
+    .delete(userController.deleteUser);
 
   app.route("/api/v1/users/:userId/collections").get();
   app.route("/api/v1/users/:userId/collections/search").get();
