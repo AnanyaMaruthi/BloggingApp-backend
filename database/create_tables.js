@@ -71,6 +71,22 @@ conn.query(create_users_collections_table, (err, result) => {
   console.log("users_collections table created");
 });
 
+// COLLECTION_AUTHORS
+let create_collection_authors_table = `
+    CREATE TABLE IF NOT EXISTS collection_authors(
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      collection_id VARCHAR(255),
+      author_id INT,
+      FOREIGN KEY(author_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+      FOREIGN KEY(collection_id) REFERENCES collections(collection_id) ON DELETE CASCADE ON UPDATE CASCADE
+    )
+`;
+
+conn.query(create_collection_authors_table, (err, result) => {
+  if (err) throw err;
+  console.log("collections_authors table created");
+});
+
 // ARTICLES TABLE
 let create_articles_table = `
     CREATE TABLE IF NOT EXISTS articles(
