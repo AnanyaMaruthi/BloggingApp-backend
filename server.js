@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 
 const userRoutes = require("./app/routes/users.routes");
 const collectionRoutes = require("./app/routes/collections.routes");
-const postRoutes = require("./app/routes/posts.routes");
+const postRoutes = require("./app/routes/articles.routes");
 
 const app = express();
 // app.use(cors);
