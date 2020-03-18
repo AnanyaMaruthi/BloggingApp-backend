@@ -13,6 +13,7 @@ let User = function(user) {
 User.insertUser = function(newUser, result) {
   conn.query(`INSERT INTO users SET ? `, newUser, (err, res) => {
     if (err) {
+      console.log("Error inserting user: ", err);
       let error = err;
       if (err.code == "ER_DUP_ENTRY") {
         error = {
