@@ -1,24 +1,22 @@
+let articleController = require("../controllers/article.controller");
+
 let routes = app => {
   app
-    .route("/api/v1/posts")
-    .get((req, res) => {
-      // to be removed
-      res.send("GET: /api/v1/posts");
-    })
-    .post();
+    .route("/api/v1/articles")
+    .get(articleController.getAllArticles)
+    .post(articleController.insertArticle);
 
-  app.route("/api/v1/posts/search").get();
-  app.route("/api/v1/posts/order").get();
+  app.route("/api/v1/articles/search").get();
+  app.route("/api/v1/articles/order").get();
 
   app
-    .route("/api/v1/posts/:postId")
-    .get()
-    .post()
+    .route("/api/v1/articles/:articleId")
+    .get(articleController.findArticleById)
     .put()
-    .patch()
-    .delete();
+    .patch(articleController.updateArticle)
+    .delete(articleController.deleteArticle);
 
-  app.route("/api/v1/posts/:postId/commments").get();
+  app.route("/api/v1/articles/:articleId/commments").get();
 };
 
 module.exports = routes;
