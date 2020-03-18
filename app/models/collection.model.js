@@ -12,6 +12,7 @@ let Collection = function(collection) {
 Collection.insertCollection = function(newCollection, result) {
   conn.query(`INSERT INTO collections SET ? `, newCollection, (err, res) => {
     if (err) {
+      console.log("Error inserting collection: ", err);
       let error = err;
       if (err.code == "ER_DUP_ENTRY") {
         error = {
@@ -21,13 +22,20 @@ Collection.insertCollection = function(newCollection, result) {
         error = {
           error: "Required fields are empty"
         };
+      } else if (err.code == "ER_NO_REFERENCED_ROW_2") {
+        error = {
+          error: "Invalid user ID. Foreign key constraint fails"
+        };
       }
       result(error, null);
     } else {
       let responseMessage = {
-        message: "Successfully inserted usDcollectioner"
+        message: "Successfully inserted collection"
       };
-      console.log("Successfully inserted collection: ", newUser.email);
+      console.log(
+        "Successfully inserted collection: ",
+        newCollection.collection_name
+      );
       result(null, responseMessage);
     }
   });

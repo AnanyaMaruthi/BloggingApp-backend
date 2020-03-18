@@ -1,22 +1,20 @@
+let collectionController = require("../controllers/collection.controller");
+
 let routes = app => {
   app
     .route("/api/v1/collections")
-    .get((req, res) => {
-      res.send("GET: /api/v1/collections");
-    })
-    .post();
+    .get(collectionController.getAllCollections)
+    .post(collectionController.insertCollection);
 
   app.route("/api/v1/collections/search");
   app.route("/api/v1/collections/order");
 
   app
     .route("/api/v1/collections/:collectionId")
-    .get((req, res) => {
-      res.send("GET: /api/v1/collections/" + req.params.collectionId);
-    })
+    .get(collectionController.findCollectionById)
     .put()
-    .patch()
-    .delete();
+    .patch(collectionController.updateCollection)
+    .delete(collectionController.deleteCollection);
 
   app.route("/api/v1/collections/:collectionId/posts").get();
   app.route("/api/v1/collections/:collectionId/posts/search").get();
