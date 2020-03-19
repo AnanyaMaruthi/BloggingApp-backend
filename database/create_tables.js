@@ -23,6 +23,7 @@ conn.query(create_user_table, (err, result) => {
 });
 
 // FOLLOWERS TABLE
+// Add primary key and not null
 let create_followers_table = `
     CREATE TABLE IF NOT EXISTS followers(
         user_id INT,
