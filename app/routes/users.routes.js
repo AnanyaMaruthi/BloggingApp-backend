@@ -15,19 +15,19 @@ let routes = app => {
     .patch(userController.updateUser)
     .delete(userController.deleteUser);
 
-  app.route("/api/v1/users/:userId/collections").get();
+  app
+    .route("/api/v1/users/:userId/collections")
+    .get(userController.getUserOwnedCollections);
   app.route("/api/v1/users/:userId/collections/search").get();
   app.route("/api/v1/users/:userId/collections/order").get();
 
   // Author collections ?
 
   app
-    .route("/api/v1/users/:userId/posts")
-    .get
-    //   do not send post content
-    ();
-  app.route("/api/v1/users/:userId/posts/search").get();
-  app.route("/api/v1/users/:userId/posts/order").get();
+    .route("/api/v1/users/:userId/articles")
+    .get(userController.getUserAuthoredArticles);
+  app.route("/api/v1/users/:userId/articles/search").get();
+  app.route("/api/v1/users/:userId/articles/order").get();
 
   app.route("/api/v1/users/:userId/interested_collections").get();
   app.route("/api/v1/users/:userId/interested_collections/search").get();
@@ -66,7 +66,7 @@ let routes = app => {
     .post();
   app
     .route("api/v1/users/:userId/following_collections/:followId")
-    .get() // Same as getting a collection. Not necessary
+    // Same as getting a collection. Not necessary
     .delete();
 
   //   TO DO: Combine search, order and the main route

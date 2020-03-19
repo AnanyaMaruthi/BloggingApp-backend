@@ -58,3 +58,19 @@ exports.getUserFollowing = (req, res) => {
     else res.json(msg);
   });
 };
+
+// Get user owned collections
+exports.getUserOwnedCollections = (req, res) => {
+  User.getUserOwnedCollections(req.params.userId, (err, collections) => {
+    if (err) res.json(err);
+    else res.json(collections);
+  });
+};
+
+// Get user suthored articles
+exports.getUserAuthoredArticles = (req, res) => {
+  User.getUserAuthoredArticles(req.params.userId, (err, articles) => {
+    if (err) res.json(err);
+    else res.json(articles);
+  });
+};

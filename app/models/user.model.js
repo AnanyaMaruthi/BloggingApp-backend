@@ -170,4 +170,41 @@ User.getFollowing = function(user_id, result) {
   );
 };
 
+// Get user's collections
+User.getUserOwnedCollections = function(user_id, result) {
+  conn.query(
+    `SELECT * FROM collections WHERE user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching user's collections: ", err);
+        result(err, null);
+      } else {
+        console.log("User's collections: ");
+        console.log(res);
+        result(null, res);
+      }
+    }
+  );
+};
+
+// Get user's authored articles
+User.getUserAuthoredArticles = function(user_id, result) {
+  conn.query(
+    `SELECT 
+        article_id, collection_id, user_id, title, published,
+        image_path, views_count, kudos_count, date_created, date_updated
+    FROM articles WHERE user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching user's articles: ", err);
+        result(err, null);
+      } else {
+        console.log("User's articles: ");
+        console.log(res);
+        result(null, res);
+      }
+    }
+  );
+};
+
 module.exports = User;
