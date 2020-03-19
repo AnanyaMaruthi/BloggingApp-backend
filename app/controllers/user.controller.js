@@ -42,3 +42,19 @@ exports.deleteUser = (req, res) => {
     else res.json(msg);
   });
 };
+
+// Returns list of users' followers
+exports.getUserFollowers = (req, res) => {
+  User.getFollowers(req.params.userId, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
+// Returns list of users followed by the specified user
+exports.getUserFollowing = (req, res) => {
+  User.getFollowing(req.params.userId, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};

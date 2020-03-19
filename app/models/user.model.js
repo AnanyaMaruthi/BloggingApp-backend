@@ -54,7 +54,27 @@ User.getAllUsers = function(result) {
 // Get user by ID
 User.findUserById = function(user_id, result) {
   conn.query(
-    `SELECT user_id, email, username, about, profile_image_url FROM users WHERE user_id = ${user_id}`,
+    `SELECT
+        user_tbl.username, user_tbl.user_id, user_tbl.email, 
+        user_tbl.about, user_tbl.profile_image_url,
+        IFNULL(user_followers.followers, 0) AS followerCount,
+        IFNULL(user_following.following, 0) AS followingCount
+        FROM
+            users user_tbl
+            LEFT JOIN
+            (
+                SELECT followers.user_id, COUNT(DISTINCT followers.follower_id) as followers
+                FROM followers 
+                GROUP BY followers.user_id
+            ) as user_followers ON user_tbl.user_id = user_followers.user_id
+            LEFT JOIN
+            (
+                SELECT followers.follower_id, COUNT(followers.user_id) as following
+                FROM followers 
+                GROUP BY followers.follower_id
+            ) as user_following ON user_tbl.user_id = user_following.follower_id
+     WHERE user_tbl.user_id = ${user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error getting user: ", err);
@@ -102,6 +122,52 @@ User.deleteUser = function(user_id, result) {
       result(null, responseMessage);
     }
   });
+};
+
+// Get followers
+User.getFollowers = function(user_id, result) {
+  conn.query(
+    `SELECT 
+        follower_tbl.user_id, follower_tbl.username, follower_tbl.email 
+        FROM users user_tbl INNER JOIN followers user_follower_tbl 
+            ON user_tbl.user_id = user_follower_tbl.user_id 
+                INNER JOIN users follower_tbl 
+                    ON user_follower_tbl.follower_id = follower_tbl.user_id
+    WHERE user_tbl.user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching followers: ", err);
+        result(err, null);
+      } else {
+        console.log("Followers: ");
+        console.log(res);
+        result(null, res);
+      }
+    }
+  );
+};
+
+// Get following
+User.getFollowing = function(user_id, result) {
+  conn.query(
+    `SELECT 
+        following_tbl.user_id, following_tbl.username, following_tbl.email 
+        FROM users user_tbl INNER JOIN followers user_follower_tbl 
+            ON user_tbl.user_id = user_follower_tbl.follower_id 
+                INNER JOIN users following_tbl 
+                    ON user_follower_tbl.user_id = following_tbl.user_id
+    WHERE user_tbl.user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching following users: ", err);
+        result(err, null);
+      } else {
+        console.log("Following: ");
+        console.log(res);
+        result(null, res);
+      }
+    }
+  );
 };
 
 module.exports = User;

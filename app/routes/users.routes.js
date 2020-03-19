@@ -42,15 +42,12 @@ let routes = app => {
   app.route("/api/v1/users/:userId/interested_posts/order").get();
 
   //   Followers and following
-  app.route("/api/v1/users/:userId/followers").get();
+  app
+    .route("/api/v1/users/:userId/followers")
+    .get(userController.getUserFollowers);
   app
     .route("/api/v1/users/:userId/following")
-    .get()
-    .post();
-  app
-    .route("/api/v1/users/:userId/following:followId")
-    .get() // same as getting a user. Not necessary
-    .delete();
+    .get(userController.getUserFollowing);
 
   //   Post Bookmarks
   app
