@@ -46,3 +46,10 @@ exports.deleteCollection = (req, res) => {
     else res.json(msg);
   });
 };
+
+exports.getCollectionArticles = (req, res) => {
+  Collection.getArticles(req.params.collectionId, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};

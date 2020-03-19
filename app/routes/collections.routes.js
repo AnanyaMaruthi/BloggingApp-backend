@@ -16,13 +16,17 @@ let routes = app => {
     .patch(collectionController.updateCollection)
     .delete(collectionController.deleteCollection);
 
-  app.route("/api/v1/collections/:collectionId/posts").get();
-  app.route("/api/v1/collections/:collectionId/posts/search").get();
-  app.route("/api/v1/collections/:collectionId/posts/order").get((req, res) => {
-    res.send(
-      "GET /api/v1/collections/:collectionId/posts/order " + req.query.ASC
-    );
-  });
+  app
+    .route("/api/v1/collections/:collectionId/articles")
+    .get(collectionController.getCollectionArticles);
+  app.route("/api/v1/collections/:collectionId/articles/search").get();
+  app
+    .route("/api/v1/collections/:collectionId/articles/order")
+    .get((req, res) => {
+      res.send(
+        "GET /api/v1/collections/:collectionId/articles/order " + req.query.ASC
+      );
+    });
 
   app.route("/api/v1/collections/:collectionId/followers").get();
 };

@@ -111,4 +111,24 @@ Collection.deleteCollection = function(collection_id, result) {
   );
 };
 
+// Get Collection Articles
+Collection.getArticles = function(collection_id, result) {
+  conn.query(
+    `SELECT 
+        article_id, collection_id, user_id, title, published,
+        image_path, views_count, kudos_count, date_created, date_updated
+    FROM articles WHERE collection_id = ${collection_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching collection articles: ", err);
+        result(err, null);
+      } else {
+        console.log("Collection articles: ");
+        console.log(res);
+        result(null, res);
+      }
+    }
+  );
+};
+
 module.exports = Collection;
