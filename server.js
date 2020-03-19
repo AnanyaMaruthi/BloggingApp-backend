@@ -4,7 +4,8 @@ const bodyParser = require("body-parser");
 
 const userRoutes = require("./app/routes/users.routes");
 const collectionRoutes = require("./app/routes/collections.routes");
-const postRoutes = require("./app/routes/articles.routes");
+const articleRoutes = require("./app/routes/articles.routes");
+const followerRoutes = require("./app/routes/followers.routes");
 
 const app = express();
 // app.use(cors);
@@ -22,7 +23,8 @@ app.route("/haha").get((req, res) => {
 
 userRoutes(app);
 collectionRoutes(app);
-postRoutes(app);
+articleRoutes(app);
+followerRoutes(app);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000.");
