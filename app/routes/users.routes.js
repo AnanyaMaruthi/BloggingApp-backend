@@ -28,19 +28,6 @@ let routes = app => {
     .get(userController.getUserAuthoredArticles);
   app.route("/api/v1/users/:userId/articles/search").get();
   app.route("/api/v1/users/:userId/articles/order").get();
-
-  app.route("/api/v1/users/:userId/interested_collections").get();
-  app.route("/api/v1/users/:userId/interested_collections/search").get();
-  app.route("/api/v1/users/:userId/interested_collections/order").get();
-
-  app
-    .route("/api/v1/users/:userId/interested_posts")
-    .get
-    //   do not send post content
-    ();
-  app.route("/api/v1/users/:userId/interested_posts/search").get();
-  app.route("/api/v1/users/:userId/interested_posts/order").get();
-
   //   Followers and following
   app
     .route("/api/v1/users/:userId/followers")
@@ -49,25 +36,26 @@ let routes = app => {
     .route("/api/v1/users/:userId/following")
     .get(userController.getUserFollowing);
 
-  //   Post Bookmarks
+  //   Article Bookmarks
+  app.route("/api/v1/users/:userId/bookmarks").get();
   app
-    .route("/api/v1/users/:userId/bookmarks_posts")
-    .get()
-    .post();
-  app
-    .route("/api/v1/users/:userId/bookmarks_posts/:bookmarkId")
-    .get() // Same as getting a post. Not necessary
+    .route("/api/v1/users/:userId/bookmarks/:articleId")
+    .post() // Same as getting a post. Not necessary
     .delete();
 
   // Following collections
   app
-    .route("api/v1/users/:userId/following_collections")
-    .get()
-    .post();
+    .route("/api/v1/users/:userId/following/collections")
+    .get(userController.getFollowingCollections)
+    .post(); //Implemented in collection routes
+
   app
-    .route("api/v1/users/:userId/following_collections/:followId")
-    // Same as getting a collection. Not necessary
-    .delete();
+    .route("/api/v1/users/:userId/following/collections/posts")
+    .get
+    //   do not send post content
+    ();
+  app.route("/api/v1/users/:userId/following/collections/posts/search").get();
+  app.route("/api/v1/users/:userId/following/collections/posts/order").get();
 
   //   TO DO: Combine search, order and the main route
 };

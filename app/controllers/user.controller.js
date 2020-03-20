@@ -1,4 +1,5 @@
 let User = require("../models/user.model");
+let CollectionFollower = require("../models/collectionFollower.model");
 
 exports.getAllUsers = (req, res) => {
   User.getAllUsers((err, users) => {
@@ -67,10 +68,18 @@ exports.getUserOwnedCollections = (req, res) => {
   });
 };
 
-// Get user suthored articles
+// Get user authored articles
 exports.getUserAuthoredArticles = (req, res) => {
   User.getUserAuthoredArticles(req.params.userId, (err, articles) => {
     if (err) res.json(err);
     else res.json(articles);
+  });
+};
+
+// Get following collections
+exports.getFollowingCollections = (req, res) => {
+  CollectionFollower.getCollections(req.params.userId, (err, collections) => {
+    if (err) res.json(err);
+    else res.json(collections);
   });
 };

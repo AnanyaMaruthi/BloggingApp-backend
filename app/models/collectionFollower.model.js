@@ -81,4 +81,24 @@ CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
   );
 };
 
+CollectionFollower.getCollections = function(user_id, result) {
+  conn.query(
+    `SELECT collections.collection_id, collections.collection_name, collections.image_url
+    FROM collections, users_collections 
+    WHERE 
+    collections.collection_id = users_collections.collection_id
+    AND
+    users_collections.user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching collections: ", err);
+        result(err, null);
+      } else {
+        console.log("Successfully fetched collections");
+
+        result(null, res);
+      }
+    }
+  );
+};
 module.exports = CollectionFollower;
