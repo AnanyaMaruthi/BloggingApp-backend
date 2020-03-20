@@ -83,3 +83,11 @@ exports.getFollowingCollections = (req, res) => {
     else res.json(collections);
   });
 };
+
+// Get articles of following collections
+exports.getFollowingCollectionArticles = (req, res) => {
+  CollectionFollower.getArticles(req.params.userId, (err, articles) => {
+    if (err) res.json(err);
+    else res.json(articles);
+  });
+};

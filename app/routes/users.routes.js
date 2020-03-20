@@ -50,12 +50,13 @@ let routes = app => {
     .post(); //Implemented in collection routes
 
   app
-    .route("/api/v1/users/:userId/following/collections/posts")
-    .get
-    //   do not send post content
-    ();
-  app.route("/api/v1/users/:userId/following/collections/posts/search").get();
-  app.route("/api/v1/users/:userId/following/collections/posts/order").get();
+    .route("/api/v1/users/:userId/following/collections/articles")
+    .get(userController.getFollowingCollectionArticles);
+
+  app
+    .route("/api/v1/users/:userId/following/collections/articles/search")
+    .get();
+  app.route("/api/v1/users/:userId/following/collections/articles/order").get();
 
   //   TO DO: Combine search, order and the main route
 };

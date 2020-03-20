@@ -101,4 +101,27 @@ CollectionFollower.getCollections = function(user_id, result) {
     }
   );
 };
+
+// Fetch articles in followed collections
+CollectionFollower.getArticles = function(user_id, result) {
+  conn.query(
+    `SELECT 
+        articles.article_id, articles.collection_id, articles.user_id, 
+        articles.title, articles.published, articles.image_path, articles.views_count, 
+        articles.kudos_count, articles.date_created, articles.date_updated
+    FROM articles
+      INNER JOIN users_collections
+        ON articles.collection_id = users_collections.collection_id
+    WHERE users_collections.user_id = ${user_id}`,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching collection articles: ", err);
+        result(err, null);
+      } else {
+        console.log("Collection articles fetched ");
+        result(null, res);
+      }
+    }
+  );
+};
 module.exports = CollectionFollower;
