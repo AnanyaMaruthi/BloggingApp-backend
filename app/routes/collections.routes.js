@@ -9,6 +9,10 @@ let routes = app => {
   app.route("/api/v1/collections/search");
   app.route("/api/v1/collections/order");
 
+  // Delete later
+  // Get all data in user_collections table
+  app.route("/api/v1/collections/followers").get(collectionController.getAll);
+
   app
     .route("/api/v1/collections/:collectionId")
     .get(collectionController.findCollectionById)
@@ -28,7 +32,14 @@ let routes = app => {
       );
     });
 
-  app.route("/api/v1/collections/:collectionId/followers").get();
+  app
+    .route("/api/v1/collections/:collectionId/followers")
+    .get(collectionController.getFollowers);
+
+  app
+    .route("/api/v1/collections/:collectionId/followers/:followerId")
+    .post(collectionController.insertFollower)
+    .delete(collectionController.deleteFollower);
 };
 
 module.exports = routes;

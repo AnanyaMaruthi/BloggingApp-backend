@@ -57,6 +57,7 @@ conn.query(create_collections_table, (err, result) => {
 });
 
 // USERS_COLLECTIONS TABLE
+// make user_id and collection_id unique together
 let create_users_collections_table = `
     CREATE TABLE IF NOT EXISTS users_collections(
         id INT PRIMARY KEY AUTO_INCREMENT,

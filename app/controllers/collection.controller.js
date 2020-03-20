@@ -1,4 +1,5 @@
 let Collection = require("../models/collection.model");
+let CollectionFollower = require("../models/collectionFollower.model");
 
 exports.getAllCollections = (req, res) => {
   Collection.getAllCollections((err, collections) => {
@@ -52,4 +53,46 @@ exports.getCollectionArticles = (req, res) => {
     if (err) res.json(err);
     else res.json(msg);
   });
+};
+
+// Get all collection followers data
+exports.getAll = (req, res) => {
+  console.log("lala");
+  CollectionFollower.getAll((err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
+// Get followers of a collection
+exports.getFollowers = (req, res) => {
+  CollectionFollower.getFollowers(req.params.collectionId, (err, followers) => {
+    if (err) res.json(err);
+    else res.json(followers);
+  });
+};
+
+// Insert a collection follower
+exports.insertFollower = (req, res) => {
+  let data = {
+    collection_id: req.params.collectionId,
+    user_id: req.params.followerId
+  };
+  let newCollectionFollower = new CollectionFollower(data);
+  CollectionFollower.insertFollower(newCollectionFollower, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
+// Delete a collection follower
+exports.deleteFollower = (req, res) => {
+  CollectionFollower.deleteFollower(
+    req.params.collectionId,
+    req.params.followerId,
+    (err, msg) => {
+      if (err) res.json(err);
+      else res.json(msg);
+    }
+  );
 };
