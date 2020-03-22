@@ -116,9 +116,9 @@ conn.query(create_articles_table, (err, result) => {
 // ARTICLE_BOOKMARKS TABLE
 let create_article_bookmarks_table = `
     CREATE TABLE IF NOT EXISTS article_bookmarks(
-        bookmark_id INT PRIMARY KEY AUTO_INCREMENT,
-        article_id VARCHAR(255),
-        user_id INT,
+        article_id VARCHAR(255) NOT NULL,
+        user_id INT NOT NULL,
+        PRIMARY KEY(article_id, user_id),
         FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY(article_id) REFERENCES articles(article_id) ON DELETE CASCADE ON UPDATE CASCADE
     )
