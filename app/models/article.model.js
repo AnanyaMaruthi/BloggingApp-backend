@@ -37,7 +37,7 @@ Article.insertArticle = function(newArticle, result) {
       result(error, null);
     } else {
       let responseMessage = {
-        message: "Successfully inserted collection"
+        message: "Successfully inserted article"
       };
       console.log("Successfully inserted article: ", newArticle.title);
       result(null, responseMessage);
