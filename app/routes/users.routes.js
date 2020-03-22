@@ -37,11 +37,16 @@ let routes = app => {
     .get(userController.getUserFollowing);
 
   //   Article Bookmarks
-  app.route("/api/v1/users/:userId/bookmarks").get();
+  // All bookmarks. Delete later
+  app.route("/api/v1/bookmarks").get(userController.geAllBookmarkedArticles);
+  app
+    .route("/api/v1/users/:userId/bookmarks")
+    .get(userController.getBookmarkedArticles);
+
   app
     .route("/api/v1/users/:userId/bookmarks/:articleId")
-    .post() // Same as getting a post. Not necessary
-    .delete();
+    .post(userController.addUserBookmark)
+    .delete(userController.removeUserBookmark);
 
   // Following collections
   app

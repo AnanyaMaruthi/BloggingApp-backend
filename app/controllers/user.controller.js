@@ -1,5 +1,6 @@
 let User = require("../models/user.model");
 let CollectionFollower = require("../models/collectionFollower.model");
+let ArticleBookmark = require("../models/articleBookmarks.model");
 
 exports.getAllUsers = (req, res) => {
   User.getAllUsers((err, users) => {
@@ -90,4 +91,46 @@ exports.getFollowingCollectionArticles = (req, res) => {
     if (err) res.json(err);
     else res.json(articles);
   });
+};
+
+// All data of article_bookmarks table
+// Delete later
+exports.geAllBookmarkedArticles = (req, res) => {
+  ArticleBookmark.getAllData((err, data) => {
+    if (err) res.json(err);
+    else res.json(data);
+  });
+};
+
+// Get user's bookmarks
+exports.getBookmarkedArticles = (req, res) => {
+  ArticleBookmark.getUserBookmarks(req.params.userId, (err, articles) => {
+    if (err) res.json(err);
+    else res.json(articles);
+  });
+};
+
+// Add bookmark
+exports.addUserBookmark = (req, res) => {
+  let data = {
+    user_id: req.params.userId,
+    article_id: req.params.articleId
+  };
+  let newBookmark = new ArticleBookmark(data);
+
+  ArticleBookmark.addUserBookmark(newBookmark, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
+exports.removeUserBookmark = (req, res) => {
+  ArticleBookmark.deleteUserBookmark(
+    req.params.userId,
+    req.params.articleId,
+    (err, msg) => {
+      if (err) res.json(err);
+      else res.json(msg);
+    }
+  );
 };
