@@ -81,9 +81,15 @@ CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
   );
 };
 
+// sending static data
 CollectionFollower.getCollections = function(user_id, result) {
   conn.query(
-    `SELECT collections.collection_id, collections.collection_name, collections.image_url
+    `
+    SELECT 
+      collections.collection_id, collections.collection_name, collections.image_url,
+      "False" as is_owner,
+      "False" as is_author,
+      "True" as is_following
     FROM collections, users_collections 
     WHERE 
     collections.collection_id = users_collections.collection_id
@@ -103,12 +109,14 @@ CollectionFollower.getCollections = function(user_id, result) {
 };
 
 // Fetch articles in followed collections
+// sending static data
 CollectionFollower.getArticles = function(user_id, result) {
   conn.query(
     `SELECT 
         articles.article_id, articles.collection_id, articles.user_id, 
         articles.title, articles.published, articles.image_path, articles.views_count, 
-        articles.kudos_count, articles.date_created, articles.date_updated
+        articles.kudos_count, articles.date_created, articles.date_updated,
+        "True" as is_bookmarked
     FROM articles
       INNER JOIN users_collections
         ON articles.collection_id = users_collections.collection_id

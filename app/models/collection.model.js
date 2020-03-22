@@ -42,24 +42,42 @@ Collection.insertCollection = function(newCollection, result) {
 };
 
 // Get all collections
+// Sending static data
 Collection.getAllCollections = function(result) {
   // Get authors also
-  conn.query(`SELECT * FROM collections`, (err, res) => {
-    if (err) {
-      console.log("Error getting collections: ", err);
-      result(err, null);
-    } else {
-      console.log("Fetched all collections");
-      result(null, res);
+  conn.query(
+    `
+      SELECT *, 
+      "False" as is_owner,
+      "False" as is_author,
+      "True" as is_following
+      FROM collections
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error getting collections: ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched all collections");
+        result(null, res);
+      }
     }
-  });
+  );
 };
 
 // Get Collection by ID
+// sending static data
 Collection.findCollectionById = function(collection_id, result) {
   // Get authors also
   conn.query(
-    `SELECT * FROM collections WHERE collection_id = '${collection_id}'`,
+    `
+      SELECT *,
+      "False" as is_owner,
+      "False" as is_author,
+      "True" as is_following
+      FROM collections 
+      WHERE collection_id = '${collection_id}'
+    `,
     (err, res) => {
       if (err) {
         console.log("Error getting collection: ", err);
@@ -112,12 +130,16 @@ Collection.deleteCollection = function(collection_id, result) {
 };
 
 // Get Collection Articles
+// sending static data
 Collection.getArticles = function(collection_id, result) {
   conn.query(
-    `SELECT 
-        article_id, collection_id, user_id, title, published,
-        image_path, views_count, kudos_count, date_created, date_updated
-    FROM articles WHERE collection_id = ${collection_id}`,
+    `
+      SELECT 
+      article_id, collection_id, user_id, title, published,
+      image_path, views_count, kudos_count, date_created, date_updated,
+      "True" as is_bookmarked
+      FROM articles WHERE collection_id = ${collection_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching collection articles: ", err);

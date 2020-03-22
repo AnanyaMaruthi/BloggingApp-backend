@@ -46,22 +46,36 @@ Article.insertArticle = function(newArticle, result) {
 };
 
 // Get all articles
+// Sending static data
 Article.getAllArticles = function(result) {
-  conn.query(`SELECT * FROM articles`, (err, res) => {
-    if (err) {
-      console.log("Error getting articles: ", err);
-      result(err, null);
-    } else {
-      console.log("Fetched all articles");
-      result(null, res);
+  conn.query(
+    `
+      SELECT *,
+      "True" as bookmarked
+      FROM articles
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error getting articles: ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched all articles");
+        result(null, res);
+      }
     }
-  });
+  );
 };
 
+// Sending static data
 // Get article by ID
 Article.findArticleById = function(article_id, result) {
   conn.query(
-    `SELECT * FROM articles WHERE article_id = '${article_id}' `,
+    `
+      SELECT *, 
+      "True" as bookmarked
+      FROM articles 
+      WHERE article_id = '${article_id}' 
+    `,
     (err, res) => {
       if (err) {
         console.log("Error getting article: ", err);

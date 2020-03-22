@@ -171,9 +171,17 @@ User.getFollowing = function(user_id, result) {
 };
 
 // Get user's collections
+// sending static data
 User.getUserOwnedCollections = function(user_id, result) {
   conn.query(
-    `SELECT * FROM collections WHERE user_id = ${user_id}`,
+    `
+      SELECT *,
+      "True" as is_owner,
+      "True" as is_author,
+      "True" as is_following
+      FROM collections 
+      WHERE user_id = ${user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching user's collections: ", err);
@@ -188,12 +196,16 @@ User.getUserOwnedCollections = function(user_id, result) {
 };
 
 // Get user's authored articles
+// sending static data
 User.getUserAuthoredArticles = function(user_id, result) {
   conn.query(
-    `SELECT 
-        article_id, collection_id, user_id, title, published,
-        image_path, views_count, kudos_count, date_created, date_updated
-    FROM articles WHERE user_id = ${user_id}`,
+    `
+    SELECT 
+      article_id, collection_id, user_id, title, published,
+      image_path, views_count, kudos_count, date_created, date_updated,
+      "False" as is_bookmarked
+    FROM articles WHERE user_id = ${user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching user's articles: ", err);
