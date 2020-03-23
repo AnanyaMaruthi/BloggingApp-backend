@@ -1,8 +1,10 @@
+let auth = require("../middleware/auth");
 let userController = require("../controllers/user.controller");
 
 let routes = app => {
   app
     .route("/api/v1/users")
+    // .get(auth, userController.getAllUsers)
     .get(userController.getAllUsers)
     .post(userController.insertUser);
 

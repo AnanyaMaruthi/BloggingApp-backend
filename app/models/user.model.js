@@ -1,7 +1,10 @@
 let conn = require("./connection");
 let bcrypt = require("bcrypt");
+let jwt = require("jsonwebtoken");
+let config = require("../config");
 
 const saltRounds = 10;
+const key = config.key;
 
 let User = function(user) {
   this.user_id = user.user_id;
@@ -44,36 +47,50 @@ User.insertUser = function(newUser, result) {
 User.login = function(email, password, result) {
   conn.query(
     `
-    SELECT username, email, password 
+    SELECT user_id, email, password 
     FROM users
     WHERE email = '${email}'
   `,
     (err, res) => {
+      // Sql error
       if (err) {
         console.log("Error login ", err);
         result(err, null);
-      } else if (res.length != 1) {
-        // let valid = bcrypt.compareSync(password, res[0]["password"])
-
-        let error = {
-          error: "Invalid email or password"
-        };
-        console.log(res);
-        result(error, null);
       } else {
-        let valid = bcrypt.compareSync(password, res[0]["password"]);
-        if (valid == true) {
-          let msg = {
-            login: true
-          };
-          console.log(res);
-          result(null, msg);
-        } else {
+        // Email not found
+        if (res.length != 1) {
           let error = {
             error: "Invalid email or password"
           };
-          console.log(res);
           result(error, null);
+        } else {
+          let valid = bcrypt.compareSync(password, res[0]["password"]);
+          // Password valid
+          if (valid == true) {
+            let payload = {
+              user_id: res[0]["user_id"],
+              email: res[0]["email"]
+            };
+            let token = jwt.sign(payload, key, {
+              algorithm: "HS256",
+              expiresIn: "15d"
+            });
+            let msg = {
+              login: true,
+              token: token
+            };
+            console.log(payload);
+            console.log(token);
+            result(null, msg);
+          }
+          // Password invalid
+          else {
+            let error = {
+              error: "Invalid email or password"
+            };
+            console.log(res);
+            result(error, null);
+          }
         }
       }
     }
