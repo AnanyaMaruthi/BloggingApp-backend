@@ -7,7 +7,7 @@ let CollectionFollower = function(collectionFollower) {
 
 // Get all data in collection followers table
 CollectionFollower.getAll = function(result) {
-  conn.query(`SELECT * FROM users_collections`, (err, res) => {
+  conn.query(`SELECT * FROM collection_followers`, (err, res) => {
     if (err) {
       console.log("Error fetching followers: ", err);
       result(err, null);
@@ -22,7 +22,7 @@ CollectionFollower.getAll = function(result) {
 // Get all followers
 CollectionFollower.getFollowers = function(collection_id, result) {
   conn.query(
-    `SELECT * FROM users_collections WHERE collection_id = ${collection_id}`,
+    `SELECT * FROM collection_followers WHERE collection_id = ${collection_id}`,
     (err, res) => {
       if (err) {
         console.log("Error fetching followers: ", err);
@@ -38,7 +38,7 @@ CollectionFollower.getFollowers = function(collection_id, result) {
 // Add follower
 CollectionFollower.insertFollower = function(newCollectionFollower, result) {
   conn.query(
-    `INSERT INTO users_collections SET ? `,
+    `INSERT INTO collection_followers SET ? `,
     newCollectionFollower,
     (err, res) => {
       if (err) {
@@ -65,7 +65,7 @@ CollectionFollower.insertFollower = function(newCollectionFollower, result) {
 // Delete follower
 CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
   conn.query(
-    `DELETE FROM users_collections WHERE user_id = ${user_id} AND collection_id = ${collection_id}`,
+    `DELETE FROM collection_followers WHERE user_id = ${user_id} AND collection_id = ${collection_id}`,
     (err, res) => {
       if (err) {
         console.log("Error deleting follower: ", err);
@@ -90,11 +90,11 @@ CollectionFollower.getCollections = function(user_id, result) {
       "False" as is_owner,
       "False" as is_author,
       "True" as is_following
-    FROM collections, users_collections 
+    FROM collections, collection_followers 
     WHERE 
-    collections.collection_id = users_collections.collection_id
+    collections.collection_id = collection_followers.collection_id
     AND
-    users_collections.user_id = ${user_id}`,
+    collection_followers.user_id = ${user_id}`,
     (err, res) => {
       if (err) {
         console.log("Error fetching collections: ", err);
@@ -118,9 +118,9 @@ CollectionFollower.getArticles = function(user_id, result) {
         articles.kudos_count, articles.date_created, articles.date_updated,
         "True" as is_bookmarked
     FROM articles
-      INNER JOIN users_collections
-        ON articles.collection_id = users_collections.collection_id
-    WHERE users_collections.user_id = ${user_id}`,
+      INNER JOIN collection_followers
+        ON articles.collection_id = collection_followers.collection_id
+    WHERE collection_followers.user_id = ${user_id}`,
     (err, res) => {
       if (err) {
         console.log("Error fetching collection articles: ", err);
