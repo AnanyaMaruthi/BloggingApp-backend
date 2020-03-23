@@ -45,8 +45,8 @@ SearchArticles.searchFollowingArticles = function(result) {
     conn.query(
         `SELECT title FROM articles WHERE MATCH(title,tags) AGAINST ('${search_string}' IN NATURAL LANGUAGE MODE) 
         AND collection_id= 
-            (SELECT collection_id FROM user_collections 
-                WHERE  user_id='${user_id})`,
+            (SELECT collection_id FROM users_collections 
+                WHERE  user_id='${user_id})'`,
         (err, res) => {
             if (err) {
               console.log("No articles found ", err);
