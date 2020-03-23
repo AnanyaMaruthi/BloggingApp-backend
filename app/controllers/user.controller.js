@@ -134,3 +134,10 @@ exports.removeUserBookmark = (req, res) => {
     }
   );
 };
+
+exports.login = (req, res) => {
+  User.login(req.body.email, req.body.password, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};

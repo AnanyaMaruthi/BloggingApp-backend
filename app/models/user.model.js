@@ -1,4 +1,7 @@
 let conn = require("./connection");
+let bcrypt = require("bcrypt");
+
+const saltRounds = 10;
 
 let User = function(user) {
   this.user_id = user.user_id;
@@ -10,7 +13,10 @@ let User = function(user) {
 };
 
 // Insert user
+// Sign up
 User.insertUser = function(newUser, result) {
+  let passwordHash = bcrypt.hashSync(newUser.password, saltRounds);
+  newUser.password = passwordHash;
   conn.query(`INSERT INTO users SET ? `, newUser, (err, res) => {
     if (err) {
       console.log("Error inserting user: ", err);
@@ -33,6 +39,45 @@ User.insertUser = function(newUser, result) {
       result(null, responseMessage);
     }
   });
+};
+
+User.login = function(email, password, result) {
+  conn.query(
+    `
+    SELECT username, email, password 
+    FROM users
+    WHERE email = '${email}'
+  `,
+    (err, res) => {
+      if (err) {
+        console.log("Error login ", err);
+        result(err, null);
+      } else if (res.length != 1) {
+        // let valid = bcrypt.compareSync(password, res[0]["password"])
+
+        let error = {
+          error: "Invalid email or password"
+        };
+        console.log(res);
+        result(error, null);
+      } else {
+        let valid = bcrypt.compareSync(password, res[0]["password"]);
+        if (valid == true) {
+          let msg = {
+            login: true
+          };
+          console.log(res);
+          result(null, msg);
+        } else {
+          let error = {
+            error: "Invalid email or password"
+          };
+          console.log(res);
+          result(error, null);
+        }
+      }
+    }
+  );
 };
 
 // Get all users

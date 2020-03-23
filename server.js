@@ -6,6 +6,7 @@ const userRoutes = require("./app/routes/users.routes");
 const collectionRoutes = require("./app/routes/collections.routes");
 const articleRoutes = require("./app/routes/articles.routes");
 const followerRoutes = require("./app/routes/followers.routes");
+const loginRoutes = require("./app/routes/login.routes");
 
 const app = express();
 // app.use(cors);
@@ -21,6 +22,7 @@ app.route("/haha").get((req, res) => {
   res.send("you at haha");
 });
 
+loginRoutes(app);
 userRoutes(app);
 collectionRoutes(app);
 articleRoutes(app);
