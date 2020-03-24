@@ -8,7 +8,8 @@ let create_user_table = `
         username VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         about VARCHAR(2048),
-        profile_image_url VARCHAR(2048)
+        profile_image_url VARCHAR(2048),
+        FULLTEXT(username, about)
     )
 `;
 
