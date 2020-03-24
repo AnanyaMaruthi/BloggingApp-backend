@@ -3,12 +3,16 @@ let CollectionFollower = require("../models/collectionFollower.model");
 
 exports.getAllCollections = (req, res) => {
   if (req.query.q) {
-    Collection.searchAllCollections(req.query.q, (err, collections) => {
-      if (err) res.json(err);
-      else res.json(collections);
-    });
+    Collection.searchAllCollections(
+      req.userId,
+      req.query.q,
+      (err, collections) => {
+        if (err) res.json(err);
+        else res.json(collections);
+      }
+    );
   } else {
-    Collection.getAllCollections((err, collections) => {
+    Collection.getAllCollections(req.userId, (err, collections) => {
       if (err) res.json(err);
       else res.json(collections);
     });
@@ -16,10 +20,14 @@ exports.getAllCollections = (req, res) => {
 };
 
 exports.findCollectionById = (req, res) => {
-  Collection.findCollectionById(req.params.collectionId, (err, collection) => {
-    if (err) res.json(err);
-    else res.json(collection);
-  });
+  Collection.findCollectionById(
+    req.userId,
+    req.params.collectionId,
+    (err, collection) => {
+      if (err) res.json(err);
+      else res.json(collection);
+    }
+  );
 };
 
 exports.insertCollection = (req, res) => {
@@ -27,6 +35,7 @@ exports.insertCollection = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let newCollection = new Collection(req.body);
+  newCollection["user_id"] = req.userId;
   Collection.insertCollection(newCollection, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
@@ -39,6 +48,7 @@ exports.updateCollection = (req, res) => {
   }
   let collection = new Collection(req.body);
   Collection.patchCollection(
+    req.userId,
     req.params.collectionId,
     collection,
     (err, msg) => {
@@ -49,14 +59,18 @@ exports.updateCollection = (req, res) => {
 };
 
 exports.deleteCollection = (req, res) => {
-  Collection.deleteCollection(req.params.collectionId, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
+  Collection.deleteCollection(
+    req.userId,
+    req.params.collectionId,
+    (err, msg) => {
+      if (err) res.json(err);
+      else res.json(msg);
+    }
+  );
 };
 
 exports.getCollectionArticles = (req, res) => {
-  Collection.getArticles(req.params.collectionId, (err, msg) => {
+  Collection.getArticles(req.userId, req.params.collectionId, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });
@@ -83,7 +97,7 @@ exports.getFollowers = (req, res) => {
 exports.insertFollower = (req, res) => {
   let data = {
     collection_id: req.params.collectionId,
-    user_id: req.params.followerId
+    user_id: req.userId
   };
   let newCollectionFollower = new CollectionFollower(data);
   CollectionFollower.insertFollower(newCollectionFollower, (err, msg) => {
@@ -96,7 +110,7 @@ exports.insertFollower = (req, res) => {
 exports.deleteFollower = (req, res) => {
   CollectionFollower.deleteFollower(
     req.params.collectionId,
-    req.params.followerId,
+    req.userId,
     (err, msg) => {
       if (err) res.json(err);
       else res.json(msg);

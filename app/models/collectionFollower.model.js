@@ -23,7 +23,7 @@ CollectionFollower.getAll = function(result) {
 // Just send count
 CollectionFollower.getFollowers = function(collection_id, result) {
   conn.query(
-    `SELECT * FROM collection_followers WHERE collection_id = ${collection_id}`,
+    `SELECT * FROM collection_followers WHERE collection_id = '${collection_id}'`,
     (err, res) => {
       if (err) {
         console.log("Error fetching followers: ", err);
@@ -66,7 +66,7 @@ CollectionFollower.insertFollower = function(newCollectionFollower, result) {
 // Delete follower
 CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
   conn.query(
-    `DELETE FROM collection_followers WHERE user_id = ${user_id} AND collection_id = ${collection_id}`,
+    `DELETE FROM collection_followers WHERE user_id = ${user_id} AND collection_id = '${collection_id}'`,
     (err, res) => {
       if (err) {
         console.log("Error deleting follower: ", err);
@@ -82,22 +82,40 @@ CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
   );
 };
 
-// sending static data
 // get following collections
 // to be shown in profile page
-CollectionFollower.getCollections = function(user_id, result) {
+CollectionFollower.getCollections = function(my_user_id, result) {
   conn.query(
     `
-    SELECT 
-      collections.collection_id, collections.collection_name, collections.image_url,
-      "False" as is_owner,
-      "False" as is_author,
-      "True" as is_following
-    FROM collections, collection_followers 
-    WHERE 
-    collections.collection_id = collection_followers.collection_id
-    AND
-    collection_followers.user_id = ${user_id}`,
+      SELECT    *,
+                collections.collection_id,
+                collections.user_id,
+                CASE
+                          WHEN ca.author_id IS NULL THEN false
+                          ELSE true
+                END AS is_author,
+                CASE
+                          WHEN collections.user_id = ${my_user_id} THEN true
+                          ELSE false 
+                END AS is_owner, 
+                CASE 
+                          WHEN followers.user_id IS NULL THEN false
+                          ELSE true 
+                END AS is_following 
+      FROM      collections
+      LEFT JOIN 
+                ( 
+                      SELECT * 
+                      FROM   collection_authors 
+                      WHERE  collection_authors.author_id = ${my_user_id}) ca 
+      ON        collections.collection_id = ca.collection_id 
+      INNER JOIN 
+                ( 
+                      SELECT * 
+                      FROM   collection_followers 
+                      WHERE  collection_followers.user_id = ${my_user_id}) followers 
+      ON        collections.collection_id = followers.collection_id 
+      `,
     (err, res) => {
       if (err) {
         console.log("Error fetching collections: ", err);
@@ -112,19 +130,34 @@ CollectionFollower.getCollections = function(user_id, result) {
 };
 
 // Fetch articles in followed collections
-// sending static data
 // yo be shown in home page
-CollectionFollower.getArticles = function(user_id, result) {
+CollectionFollower.getArticles = function(my_user_id, result) {
   conn.query(
-    `SELECT 
-        articles.article_id, articles.collection_id, articles.user_id, 
-        articles.title, articles.published, articles.image_path, articles.views_count, 
-        articles.kudos_count, articles.date_created, articles.date_updated,
-        "True" as is_bookmarked
-    FROM articles
-      INNER JOIN collection_followers
-        ON articles.collection_id = collection_followers.collection_id
-    WHERE collection_followers.user_id = ${user_id}`,
+    `
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path,
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id
+    INNER JOIN
+              (
+                    SELECT collection_id
+                    FROM   collection_followers
+                    WHERE  collection_followers.user_id = ${my_user_id}) followers 
+    ON        articles.collection_id = followers.collection_id 
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching collection articles: ", err);

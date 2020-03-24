@@ -42,16 +42,37 @@ Collection.insertCollection = function(newCollection, result) {
 };
 
 // Get all collections
-// Sending static data
-Collection.getAllCollections = function(result) {
-  // Get authors also
+Collection.getAllCollections = function(my_user_id, result) {
   conn.query(
     `
-      SELECT *, 
-      false as is_owner,
-      false as is_author,
-      true as is_following
-      FROM collections
+    SELECT
+              collections.collection_id,
+              collections.user_id,
+              CASE
+                        WHEN ca.author_id IS NULL THEN false
+                        ELSE true
+              END AS is_author,
+              CASE
+                        WHEN collections.user_id = ${my_user_id} THEN true
+                        ELSE false 
+              END AS is_owner, 
+              CASE 
+                        WHEN followers.user_id IS NULL THEN false
+                        ELSE true 
+              END AS is_following 
+    FROM      collections 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_authors 
+                    WHERE  collection_authors.author_id = ${my_user_id}) ca 
+    ON        collections.collection_id = ca.collection_id 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_followers 
+                    WHERE  collection_followers.user_id = ${my_user_id}) followers 
+    ON        collections.collection_id = followers.collection_id 
     `,
     (err, res) => {
       if (err) {
@@ -66,13 +87,37 @@ Collection.getAllCollections = function(result) {
 };
 
 // Search all collections
-Collection.searchAllCollections = function(searchString, result) {
+Collection.searchAllCollections = function(my_user_id, searchString, result) {
   conn.query(
-    `SELECT *,
-    false as is_owner,
-    false as is_author,
-    true as is_following 
-    FROM collections
+    `
+    SELECT
+              collections.collection_id,
+              collections.user_id,
+              CASE
+                        WHEN ca.author_id IS NULL THEN false
+                        ELSE true
+              END AS is_author,
+              CASE
+                        WHEN collections.user_id = ${my_user_id} THEN true
+                        ELSE false 
+              END AS is_owner, 
+              CASE 
+                        WHEN followers.user_id IS NULL THEN false
+                        ELSE true 
+              END AS is_following 
+    FROM      collections 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_authors 
+                    WHERE  collection_authors.author_id = ${my_user_id}) ca 
+    ON        collections.collection_id = ca.collection_id 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_followers 
+                    WHERE  collection_followers.user_id = ${my_user_id}) followers 
+    ON        collections.collection_id = followers.collection_id 
     WHERE MATCH(collection_name,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
     (err, res) => {
       if (err) {
@@ -88,16 +133,39 @@ Collection.searchAllCollections = function(searchString, result) {
 
 // Get Collection by ID
 // sending static data
-Collection.findCollectionById = function(collection_id, result) {
+Collection.findCollectionById = function(my_user_id, collection_id, result) {
   // Get authors also
   conn.query(
     `
-      SELECT *,
-      "False" as is_owner,
-      "False" as is_author,
-      "True" as is_following
-      FROM collections 
-      WHERE collection_id = '${collection_id}'
+    SELECT    *,
+              collections.collection_id,
+              collections.user_id,
+              CASE
+                        WHEN ca.author_id IS NULL THEN false
+                        ELSE true
+              END AS is_author,
+              CASE
+                        WHEN collections.user_id = ${my_user_id} THEN true
+                        ELSE false 
+              END AS is_owner, 
+              CASE 
+                        WHEN followers.user_id IS NULL THEN false
+                        ELSE true 
+              END AS is_following 
+    FROM      collections 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_authors 
+                    WHERE  collection_authors.author_id = ${my_user_id}) ca 
+    ON        collections.collection_id = ca.collection_id 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_followers 
+                    WHERE  collection_followers.user_id = ${user_id}) followers 
+    ON        collections.collection_id = followers.collection_id 
+    WHERE collections.collection_id = '${collection_id}'
     `,
     (err, res) => {
       if (err) {
@@ -112,9 +180,20 @@ Collection.findCollectionById = function(collection_id, result) {
 };
 
 // Patch Collection
-Collection.patchCollection = function(collection_id, collection, result) {
+Collection.patchCollection = function(
+  my_user_id,
+  collection_id,
+  collection,
+  result
+) {
   conn.query(
-    `UPDATE collections SET description = '${collection.description}', image_url = '${collection.image_url}' WHERE collection_id = ${collection_id}`,
+    `
+    UPDATE collections
+    SET    description = '${collection.description}', 
+           image_url = '${collection.image_url}' 
+    WHERE  collection_id = '${collection_id}' 
+    AND    user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error while updating: ", err);
@@ -131,10 +210,13 @@ Collection.patchCollection = function(collection_id, collection, result) {
 };
 
 // Delete Collection
-Collection.deleteCollection = function(collection_id, result) {
+Collection.deleteCollection = function(my_user_id, collection_id, result) {
   conn.query(
-    `DELETE FROM collections WHERE collection_id = ?`,
-    [collection_id],
+    `
+    DELETE
+    FROM   collections
+    WHERE  collection_id = '${collection_id}' AND user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error deleting collection: ", err);
@@ -151,15 +233,27 @@ Collection.deleteCollection = function(collection_id, result) {
 };
 
 // Get Collection Articles
-// sending static data
-Collection.getArticles = function(collection_id, result) {
+Collection.getArticles = function(my_user_id, collection_id, result) {
   conn.query(
     `
-      SELECT 
-      article_id, collection_id, user_id, title, published,
-      image_path, views_count, kudos_count, date_created, date_updated,
-      "True" as is_bookmarked
-      FROM articles WHERE collection_id = ${collection_id}
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id 
+    WHERE     articles.collection_id = '${collection_id}'
     `,
     (err, res) => {
       if (err) {

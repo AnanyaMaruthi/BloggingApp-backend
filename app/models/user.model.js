@@ -385,25 +385,25 @@ User.getUserOwnedCollections = function(my_user_id, result) {
                         ELSE true
               END AS is_author,
               CASE
-                        WHEN collections.user_id = ${user_id} THEN true
+                        WHEN collections.user_id = ${my_user_id} THEN true
                         ELSE false 
               END AS is_owner, 
               CASE 
                         WHEN followers.user_id IS NULL THEN false
                         ELSE true 
               END AS is_following 
-    FROM      collections 
+    FROM      collections
     LEFT JOIN 
               ( 
                     SELECT * 
                     FROM   collection_authors 
-                    WHERE  collection_authors.author_id = ${user_id}) ca 
+                    WHERE  collection_authors.author_id = ${my_user_id}) ca 
     ON        collections.collection_id = ca.collection_id 
     LEFT JOIN 
               ( 
                     SELECT * 
                     FROM   collection_followers 
-                    WHERE  collection_followers.user_id = ${user_id}) followers 
+                    WHERE  collection_followers.user_id = ${my_user_id}) followers 
     ON        collections.collection_id = followers.collection_id 
     WHERE collections.user_id = ${my_user_id}
     `,
@@ -429,7 +429,7 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
               articles.collection_id,
               articles.title,
               articles.date_created,
-              articles.image_path
+              articles.image_path,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
