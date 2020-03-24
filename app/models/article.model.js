@@ -16,43 +16,63 @@ const Article = function(article) {
 
 // Insert Article
 Article.insertArticle = function(newArticle, result) {
-  conn.query(`INSERT INTO articles SET ?`, newArticle, (err, res) => {
-    if (err) {
-      console.log("Error inserting user: ", err);
-      let error = err;
-      if (err.code == "ER_DUP_ENTRY") {
-        error = {
-          error: "Article ID exists"
+  conn.query(
+    `
+    INSERT INTO articles 
+    SET ?
+    `,
+    newArticle,
+    (err, res) => {
+      if (err) {
+        console.log("Error inserting article: ", err);
+        let error = err;
+        if (err.code == "ER_DUP_ENTRY") {
+          error = {
+            error: "Article ID exists"
+          };
+        } else if (err.code == "ER_BAD_NULL_ERROR") {
+          error = {
+            error: "Required fields are empty"
+          };
+        } else if (err.code == "ER_NO_REFERENCED_ROW_2") {
+          error = {
+            error:
+              "Invalid user ID or collection ID. Foreign key constraint fails"
+          };
+        }
+        result(error, null);
+      } else {
+        let responseMessage = {
+          message: "Successfully inserted article"
         };
-      } else if (err.code == "ER_BAD_NULL_ERROR") {
-        error = {
-          error: "Required fields are empty"
-        };
-      } else if (err.code == "ER_NO_REFERENCED_ROW_2") {
-        error = {
-          error:
-            "Invalid user ID or collection ID. Foreign key constraint fails"
-        };
+        console.log("Successfully inserted article: ", newArticle.title);
+        result(null, responseMessage);
       }
-      result(error, null);
-    } else {
-      let responseMessage = {
-        message: "Successfully inserted article"
-      };
-      console.log("Successfully inserted article: ", newArticle.title);
-      result(null, responseMessage);
     }
-  });
+  );
 };
 
 // Get all articles
-// Sending static data
-Article.getAllArticles = function(result) {
+Article.getAllArticles = function(my_user_id, result) {
   conn.query(
     `
-      SELECT *,
-      "True" as bookmarked
-      FROM articles
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path,
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id 
     `,
     (err, res) => {
       if (err) {
@@ -67,11 +87,28 @@ Article.getAllArticles = function(result) {
 };
 
 // Search all articles
-// Sending static data
-Article.searchAllArticles = function(searchString, result) {
+Article.searchAllArticles = function(my_user_id, searchString, result) {
   conn.query(
-    `SELECT *,"True" as bookmarked
-     FROM articles WHERE MATCH(title,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    `
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path,
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id 
+    WHERE MATCH(title,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)
+    `,
     (err, res) => {
       if (err) {
         console.log("No articles found", err);
@@ -84,15 +121,27 @@ Article.searchAllArticles = function(searchString, result) {
   );
 };
 
-// Sending static data
 // Get article by ID
-Article.findArticleById = function(article_id, result) {
+Article.findArticleById = function(my_user_id, article_id, result) {
   conn.query(
     `
-      SELECT *, 
-      "True" as bookmarked
-      FROM articles 
-      WHERE article_id = '${article_id}' 
+    SELECT    *,
+              CASE
+                        WHEN ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked,
+              CASE
+                        WHEN articles.user_id = ${my_user_id} THEN true
+                        ELSE false
+              END AS is_author
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id 
+    WHERE articles.article_id = '${article_id}'
     `,
     (err, res) => {
       if (err) {
@@ -107,9 +156,18 @@ Article.findArticleById = function(article_id, result) {
 };
 
 // Patch article
-Article.patchArticle = function(article_id, article, result) {
+Article.patchArticle = function(my_user_id, article_id, article, result) {
   conn.query(
-    `UPDATE articles SET collection_id='${article.collection_id}', title='${article.title}', content='${article.content}', published=${article.published}, image_path='${article.image_path}', date_updated='${article.date_updated}' WHERE article_id='${article_id}'`,
+    `
+    UPDATE articles
+    SET   collection_id='${article.collection_id}', 
+          title='${article.title}', 
+          content='${article.content}', 
+          published=${article.published}, 
+          image_path='${article.image_path}', 
+          date_updated='${article.date_updated}' 
+    WHERE  article_id='${article_id}' and user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         let error = err;
@@ -135,12 +193,36 @@ Article.patchArticle = function(article_id, article, result) {
 };
 
 // Update kudos
-// Update views
+Article.updateKudos = function(article_id, kudos, result) {
+  conn.query(
+    `
+    UPDATE articles
+    SET   kudos = ${kudos}
+    WHERE  article_id='${article_id}'
+    `,
+    (err, res) => {
+      if (err) {
+        let error = err;
+        console.log("Error while updating: ", err);
+        result(error, null);
+      } else {
+        console.log("Successfully updated kudos");
+        let responseMessage = {
+          message: "Successfully updated kudos"
+        };
+        result(null, responseMessage);
+      }
+    }
+  );
+};
 
 // Delete article
-Article.deleteArticle = function(article_id, result) {
+Article.deleteArticle = function(my_user_id, article_id, result) {
   conn.query(
-    `DELETE FROM articles WHERE article_id = ?`,
+    `
+    DELETE FROM articles 
+    WHERE  article_id = '${article_id}' AND user_id = ${my_user_id}
+    `,
     [article_id],
     (err, res) => {
       if (err) {
@@ -158,5 +240,3 @@ Article.deleteArticle = function(article_id, result) {
 };
 
 module.exports = Article;
-
-// to do : figure out sql date format

@@ -28,11 +28,13 @@ let routes = app => {
   app
     .route("/api/v1/user/followers")
     .get(auth, userController.getUserFollowers);
+
   app.route("/api/v1/userfollowing").get(auth, userController.getUserFollowing);
 
-  //   Article Bookmarks
+  // Article Bookmarks
   // All bookmarks. Delete later
   app.route("/api/v1/bookmarks").get(userController.geAllBookmarkedArticles);
+
   app
     .route("/api/v1/user/bookmarks")
     .get(auth, userController.getBookmarkedArticles);

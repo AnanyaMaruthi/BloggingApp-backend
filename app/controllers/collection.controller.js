@@ -35,7 +35,7 @@ exports.insertCollection = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let newCollection = new Collection(req.body);
-  newCollection["user_id"] = req.userId;
+  newCollection.user_id = req.userId;
   Collection.insertCollection(newCollection, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
