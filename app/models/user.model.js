@@ -98,9 +98,25 @@ User.login = function(email, password, result) {
 };
 
 // Get all users
-User.getAllUsers = function(result) {
+User.getAllUsers = function(my_user_id, result) {
   conn.query(
-    `SELECT user_id, email, username, about, profile_image_url FROM users`,
+    `
+    SELECT    users.user_id,
+              users.email,
+              users.username,
+              users.profile_image_url,
+              CASE
+                        WHEN followers.follower_id IS NULL THEN false
+                        ELSE true
+              END AS is_following
+    FROM      users
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   followers
+                    WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON        users.user_id = followers.user_id
+    `,
     (err, res) => {
       if (err) {
         console.log("Error getting users: ", err);
@@ -116,14 +132,26 @@ User.getAllUsers = function(result) {
 // Search all users
 // get follower and following
 // Sending static data
-User.searchAllUsers = function(searchString, result) {
+User.searchAllUsers = function(my_user_id, searchString, result) {
   console.log("model");
   conn.query(
-    `SELECT 
-      user_id,username,profile_image_url,
-      true as following
-    FROM users 
-    WHERE MATCH(username, about) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    `
+    SELECT    users.user_id,
+              users.email,
+              users.username,
+              users.profile_image_url,
+              CASE
+                        WHEN followers.follower_id IS NULL THEN false
+                        ELSE true
+              END AS is_following
+    FROM      users
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   followers
+                    WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON        users.user_id = followers.user_id
+    WHERE     MATCH(users.username, users.about) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
     (err, res) => {
       if (err) {
         console.log("No users found ", err);
@@ -136,29 +164,83 @@ User.searchAllUsers = function(searchString, result) {
   );
 };
 
-// Get user by ID
-User.findUserById = function(user_id, result) {
+// function to get user profile
+User.findUserById = function(my_user_id, result) {
   conn.query(
-    `SELECT
-        user_tbl.username, user_tbl.user_id, user_tbl.email, 
-        user_tbl.about, user_tbl.profile_image_url,
-        IFNULL(user_followers.followers, 0) AS followerCount,
-        IFNULL(user_following.following, 0) AS followingCount
-        FROM
-            users user_tbl
-            LEFT JOIN
-            (
-                SELECT followers.user_id, COUNT(DISTINCT followers.follower_id) as followers
-                FROM followers 
-                GROUP BY followers.user_id
-            ) as user_followers ON user_tbl.user_id = user_followers.user_id
-            LEFT JOIN
-            (
-                SELECT followers.follower_id, COUNT(followers.user_id) as following
-                FROM followers 
-                GROUP BY followers.follower_id
-            ) as user_following ON user_tbl.user_id = user_following.follower_id
-     WHERE user_tbl.user_id = ${user_id}
+    `
+    SELECT    user_tbl.username,
+              user_tbl.user_id,
+              user_tbl.email,
+              user_tbl.about,
+              user_tbl.profile_image_url,
+              Ifnull(user_followers.followers, 0) AS followercount,
+              Ifnull(user_following.following, 0) AS followingcount
+    FROM      users user_tbl
+    LEFT JOIN
+              (
+                      SELECT   followers.user_id,
+                                Count(DISTINCT followers.follower_id) AS followers
+                      FROM     followers
+                      GROUP BY followers.user_id ) AS user_followers
+    ON        user_tbl.user_id = user_followers.user_id
+    LEFT JOIN
+              (
+                      SELECT   followers.follower_id,
+                                Count(followers.user_id) AS following
+                      FROM     followers
+                      GROUP BY followers.follower_id ) AS user_following
+    ON        user_tbl.user_id = user_following.follower_id
+    WHERE     user_tbl.user_id = ${my_user_id}
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error getting user: ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched user");
+        result(null, res);
+      }
+    }
+  );
+};
+
+// Get user by ID
+User.findUserById = function(my_user_id, user_id, result) {
+  conn.query(
+    `
+    SELECT    user_tbl.username,
+              user_tbl.user_id,
+              user_tbl.email,
+              user_tbl.about,
+              user_tbl.profile_image_url,
+              Ifnull(user_followers.followers, 0) AS followercount,
+              Ifnull(user_following.following, 0) AS followingcount,
+              CASE
+                        WHEN followers.follower_id IS NULL THEN false
+                        ELSE true
+              END AS is_following
+    FROM      users user_tbl
+    LEFT JOIN
+              (
+                      SELECT   followers.user_id,
+                                Count(DISTINCT followers.follower_id) AS followers
+                      FROM     followers
+                      GROUP BY followers.user_id ) AS user_followers
+    ON        user_tbl.user_id = user_followers.user_id
+    LEFT JOIN
+              (
+                      SELECT   followers.follower_id,
+                                Count(followers.user_id) AS following
+                      FROM     followers
+                      GROUP BY followers.follower_id ) AS user_following
+    ON        user_tbl.user_id = user_following.follower_id
+    LEFT JOIN
+              (
+                SELECT *
+                    FROM   followers
+                    WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON        user_tbl.user_id = followers.user_id
+    WHERE     user_tbl.user_id = ${user_id}
     `,
     (err, res) => {
       if (err) {
@@ -175,9 +257,15 @@ User.findUserById = function(user_id, result) {
 // Get user by email
 
 // Patch user
-User.patchUser = function(user_id, user, result) {
+User.patchUser = function(my_user_id, user, result) {
   conn.query(
-    `UPDATE users SET username = '${user.username}', about = '${user.about}', profile_image_url = '${user.profile_image_url}' WHERE user_id = ${user_id}`,
+    `
+    UPDATE users
+    SET    username = '${user.username}', 
+          about = '${user.about}', 
+          profile_image_url = '${user.profile_image_url}' 
+    WHERE  user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error while updating: ", err);
@@ -194,31 +282,53 @@ User.patchUser = function(user_id, user, result) {
 };
 
 // Delete user
-User.deleteUser = function(user_id, result) {
-  conn.query(`DELETE FROM users WHERE user_id = ?`, [user_id], (err, res) => {
-    if (err) {
-      console.log("Error deleting user: ", err);
-      result(err, null);
-    } else {
-      console.log("Successfully deleted user");
-      let responseMessage = {
-        message: "Successfully deleted user"
-      };
-      result(null, responseMessage);
+User.deleteUser = function(my_user_id, result) {
+  conn.query(
+    `
+      DELETE FROM users 
+      WHERE  user_id = ${my_user_id}
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error deleting user: ", err);
+        result(err, null);
+      } else {
+        console.log("Successfully deleted user");
+        let responseMessage = {
+          message: "Successfully deleted user"
+        };
+        result(null, responseMessage);
+      }
     }
-  });
+  );
 };
 
 // Get followers
-User.getFollowers = function(user_id, result) {
+// Add is_following field
+User.getFollowers = function(my_user_id, result) {
   conn.query(
-    `SELECT 
-        follower_tbl.user_id, follower_tbl.username, follower_tbl.email 
-        FROM users user_tbl INNER JOIN followers user_follower_tbl 
-            ON user_tbl.user_id = user_follower_tbl.user_id 
-                INNER JOIN users follower_tbl 
-                    ON user_follower_tbl.follower_id = follower_tbl.user_id
-    WHERE user_tbl.user_id = ${user_id}`,
+    `
+    SELECT    follower_tbl.user_id,
+              follower_tbl.username,
+              follower_tbl.email,
+              follower_tbl.profile_image_url,
+               CASE
+                        WHEN followers.follower_id IS NULL THEN false
+                        ELSE true
+              END AS is_following
+    FROM       users user_tbl
+    INNER JOIN followers user_follower_tbl
+    ON         user_tbl.user_id = user_follower_tbl.user_id
+    INNER JOIN users follower_tbl
+    ON         user_follower_tbl.follower_id = follower_tbl.user_id
+    LEFT JOIN
+              (
+                SELECT *
+                    FROM   followers
+                    WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON        user_tbl.user_id = followers.user_id
+    WHERE      user_tbl.user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching followers: ", err);
@@ -233,15 +343,21 @@ User.getFollowers = function(user_id, result) {
 };
 
 // Get following
-User.getFollowing = function(user_id, result) {
+User.getFollowing = function(my_user_id, result) {
   conn.query(
-    `SELECT 
-        following_tbl.user_id, following_tbl.username, following_tbl.email 
-        FROM users user_tbl INNER JOIN followers user_follower_tbl 
-            ON user_tbl.user_id = user_follower_tbl.follower_id 
-                INNER JOIN users following_tbl 
-                    ON user_follower_tbl.user_id = following_tbl.user_id
-    WHERE user_tbl.user_id = ${user_id}`,
+    `
+    SELECT    following_tbl.user_id,
+              following_tbl.username,
+              following_tbl.email,
+              following_tbl.proofile_image_url,
+              true as is_following
+    FROM       users user_tbl
+    INNER JOIN followers user_follower_tbl
+    ON         user_tbl.user_id = user_follower_tbl.follower_id
+    INNER JOIN users following_tbl
+    ON         user_follower_tbl.user_id = following_tbl.user_id
+    WHERE      user_tbl.user_id = ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("Error fetching following users: ", err);
@@ -258,15 +374,38 @@ User.getFollowing = function(user_id, result) {
 // Get user's collections
 // sending static data
 // combine with authored collections and send
-User.getUserOwnedCollections = function(user_id, result) {
+User.getUserOwnedCollections = function(my_user_id, result) {
   conn.query(
     `
-      SELECT *,
-      "True" as is_owner,
-      "True" as is_author,
-      "True" as is_following
-      FROM collections 
-      WHERE user_id = ${user_id}
+    SELECT    *,
+              collections.collection_id,
+              collections.user_id,
+              CASE
+                        WHEN ca.author_id IS NULL THEN false
+                        ELSE true
+              END AS is_author,
+              CASE
+                        WHEN collections.user_id = ${user_id} THEN true
+                        ELSE false 
+              END AS is_owner, 
+              CASE 
+                        WHEN followers.user_id IS NULL THEN false
+                        ELSE true 
+              END AS is_following 
+    FROM      collections 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_authors 
+                    WHERE  collection_authors.author_id = ${user_id}) ca 
+    ON        collections.collection_id = ca.collection_id 
+    LEFT JOIN 
+              ( 
+                    SELECT * 
+                    FROM   collection_followers 
+                    WHERE  collection_followers.user_id = ${user_id}) followers 
+    ON        collections.collection_id = followers.collection_id 
+    WHERE collections.user_id = ${my_user_id}
     `,
     (err, res) => {
       if (err) {
@@ -282,16 +421,27 @@ User.getUserOwnedCollections = function(user_id, result) {
 };
 
 // Get user's authored articles
-// sending static data
-// not needed
-User.getUserAuthoredArticles = function(user_id, result) {
+User.getUserAuthoredArticles = function(my_user_id, result) {
   conn.query(
     `
-    SELECT 
-      article_id, collection_id, user_id, title, published,
-      image_path, views_count, kudos_count, date_created, date_updated,
-      "False" as is_bookmarked
-    FROM articles WHERE user_id = ${user_id}
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id 
+    WHERE     articles.user_id = ${my_user_id}
     `,
     (err, res) => {
       if (err) {

@@ -2,69 +2,54 @@ let auth = require("../middleware/auth");
 let userController = require("../controllers/user.controller");
 
 let routes = app => {
-  app
-    .route("/api/v1/users")
-    // .get(auth, userController.getAllUsers)
-    // /api/v1/users?q=searchstring
-    .get(userController.getAllUsers)
-    .post(userController.insertUser);
+  app.route("/api/v1/users").get(auth, userController.getAllUsers);
+  // .post(userController.insertUser); SIgnup
 
   app
-    .route("/api/v1/users/:userId")
-    .get(userController.findUserById)
-    .put()
-    .patch(userController.updateUser)
-    .delete(userController.deleteUser);
+    .route("/api/v1/user")
+    .get(auth, userController.getUserProfile)
+    .patch(auth, userController.updateUser)
+    .delete(auth, userController.deleteUser);
+
+  // Get other users
+  app.route("/api/v1/users/:userId").get(auth, userController.findUserById);
 
   app
-    .route("/api/v1/users/:userId/collections")
-    .get(userController.getUserOwnedCollections);
-  app.route("/api/v1/users/:userId/collections/search").get();
-  app.route("/api/v1/users/:userId/collections/order").get();
+    .route("/api/v1/user/collections")
+    .get(auth, userController.getUserOwnedCollections);
 
   // Author collections ?
 
   app
-    .route("/api/v1/users/:userId/articles")
-    .get(userController.getUserAuthoredArticles);
-  app.route("/api/v1/users/:userId/articles/search").get();
-  app.route("/api/v1/users/:userId/articles/order").get();
+    .route("/api/v1/user/articles")
+    .get(auth, userController.getUserAuthoredArticles);
+
   //   Followers and following
   app
-    .route("/api/v1/users/:userId/followers")
-    .get(userController.getUserFollowers);
-  app
-    .route("/api/v1/users/:userId/following")
-    .get(userController.getUserFollowing);
+    .route("/api/v1/user/followers")
+    .get(auth, userController.getUserFollowers);
+  app.route("/api/v1/userfollowing").get(auth, userController.getUserFollowing);
 
   //   Article Bookmarks
   // All bookmarks. Delete later
   app.route("/api/v1/bookmarks").get(userController.geAllBookmarkedArticles);
   app
-    .route("/api/v1/users/:userId/bookmarks")
-    .get(userController.getBookmarkedArticles);
+    .route("/api/v1/user/bookmarks")
+    .get(auth, userController.getBookmarkedArticles);
 
   app
-    .route("/api/v1/users/:userId/bookmarks/:articleId")
-    .post(userController.addUserBookmark)
-    .delete(userController.removeUserBookmark);
+    .route("/api/v1/user/bookmarks/:articleId")
+    .post(auth, userController.addUserBookmark)
+    .delete(auth, userController.removeUserBookmark);
 
   // Following collections
   app
-    .route("/api/v1/users/:userId/following/collections")
-    .get(userController.getFollowingCollections)
-    .post(); //Implemented in collection routes
+    .route("/api/v1/user/following/collections")
+    .get(auth, userController.getFollowingCollections);
 
   app
-    .route("/api/v1/users/:userId/following/collections/articles")
-    .get(userController.getFollowingCollectionArticles);
-
-  app
-    .route("/api/v1/users/:userId/following/collections/articles/search")
-    .get();
-  app.route("/api/v1/users/:userId/following/collections/articles/order").get();
-
-  //   TO DO: Combine search, order and the main route
+    .route("/api/v1/user/following/collections/articles")
+    .get(auth, userController.getFollowingCollectionArticles);
 };
 
 module.exports = routes;

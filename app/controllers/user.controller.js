@@ -4,20 +4,28 @@ let ArticleBookmark = require("../models/articleBookmarks.model");
 
 exports.getAllUsers = (req, res) => {
   if (req.query.q) {
-    User.searchAllUsers(req.query.q, (err, users) => {
+    User.searchAllUsers(req.userId, req.query.q, (err, users) => {
       if (err) res.json(err);
       else res.json(users);
     });
   } else {
-    User.getAllUsers((err, users) => {
+    // Delete later
+    User.getAllUsers(req.userId, (err, users) => {
       if (err) res.json(err);
       else res.json(users);
     });
   }
 };
 
+exports.getUserProfile = (req, res) => {
+  User.getUserProfile(req.userId, (err, user) => {
+    if (err) res.json(err);
+    else res.json(user);
+  });
+};
+
 exports.findUserById = (req, res) => {
-  User.findUserById(req.params.userId, (err, user) => {
+  User.findUserById(req.userId, req.params.userId, (err, user) => {
     if (err) res.json(err);
     else res.json(user);
   });
@@ -39,14 +47,14 @@ exports.updateUser = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let user = new User(req.body);
-  User.patchUser(req.params.userId, user, (err, msg) => {
+  User.patchUser(req.userId, user, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });
 };
 
 exports.deleteUser = (req, res) => {
-  User.deleteUser(req.params.userId, (err, msg) => {
+  User.deleteUser(req.userId, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });
@@ -54,7 +62,7 @@ exports.deleteUser = (req, res) => {
 
 // Returns list of users' followers
 exports.getUserFollowers = (req, res) => {
-  User.getFollowers(req.params.userId, (err, msg) => {
+  User.getFollowers(req.userId, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });
@@ -62,7 +70,7 @@ exports.getUserFollowers = (req, res) => {
 
 // Returns list of users followed by the specified user
 exports.getUserFollowing = (req, res) => {
-  User.getFollowing(req.params.userId, (err, msg) => {
+  User.getFollowing(req.userId, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });
@@ -70,7 +78,7 @@ exports.getUserFollowing = (req, res) => {
 
 // Get user owned collections
 exports.getUserOwnedCollections = (req, res) => {
-  User.getUserOwnedCollections(req.params.userId, (err, collections) => {
+  User.getUserOwnedCollections(req.userId, (err, collections) => {
     if (err) res.json(err);
     else res.json(collections);
   });
@@ -78,15 +86,16 @@ exports.getUserOwnedCollections = (req, res) => {
 
 // Get user authored articles
 exports.getUserAuthoredArticles = (req, res) => {
-  User.getUserAuthoredArticles(req.params.userId, (err, articles) => {
+  User.getUserAuthoredArticles(req.userId, (err, articles) => {
     if (err) res.json(err);
     else res.json(articles);
   });
 };
 
 // Get following collections
+// Union and send author collections
 exports.getFollowingCollections = (req, res) => {
-  CollectionFollower.getCollections(req.params.userId, (err, collections) => {
+  CollectionFollower.getCollections(req.userId, (err, collections) => {
     if (err) res.json(err);
     else res.json(collections);
   });
@@ -94,7 +103,7 @@ exports.getFollowingCollections = (req, res) => {
 
 // Get articles of following collections
 exports.getFollowingCollectionArticles = (req, res) => {
-  CollectionFollower.getArticles(req.params.userId, (err, articles) => {
+  CollectionFollower.getArticles(req.userId, (err, articles) => {
     if (err) res.json(err);
     else res.json(articles);
   });
@@ -111,7 +120,7 @@ exports.geAllBookmarkedArticles = (req, res) => {
 
 // Get user's bookmarks
 exports.getBookmarkedArticles = (req, res) => {
-  ArticleBookmark.getUserBookmarks(req.params.userId, (err, articles) => {
+  ArticleBookmark.getUserBookmarks(req.userId, (err, articles) => {
     if (err) res.json(err);
     else res.json(articles);
   });
@@ -120,7 +129,7 @@ exports.getBookmarkedArticles = (req, res) => {
 // Add bookmark
 exports.addUserBookmark = (req, res) => {
   let data = {
-    user_id: req.params.userId,
+    user_id: req.userId,
     article_id: req.params.articleId
   };
   let newBookmark = new ArticleBookmark(data);
@@ -133,7 +142,7 @@ exports.addUserBookmark = (req, res) => {
 
 exports.removeUserBookmark = (req, res) => {
   ArticleBookmark.deleteUserBookmark(
-    req.params.userId,
+    req.userId,
     req.params.articleId,
     (err, msg) => {
       if (err) res.json(err);

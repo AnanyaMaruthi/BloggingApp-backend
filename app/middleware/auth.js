@@ -9,7 +9,7 @@ let auth = async (req, res, next) => {
   try {
     let data = jwt.verify(token, key, { algorithm: "HS256" });
     console.log(data);
-    req.user_id = data.user_id;
+    req.userId = data.user_id;
     req.token = token;
     next();
   } catch (err) {

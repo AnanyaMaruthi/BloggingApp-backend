@@ -9,32 +9,20 @@ exports.getAllFollowers = (req, res) => {
 };
 
 exports.insertFollower = (req, res) => {
-  if (!req.body.user_id) {
-    res.status(400).json({ error: "User ID not specified" });
-  } else {
-    let data = {
-      follower_id: req.params.followerId,
-      user_id: req.body.user_id
-    };
-    let newFollower = new Follower(data);
-    Follower.insertFollower(newFollower, (err, msg) => {
-      if (err) res.json(err);
-      else res.json(msg);
-    });
-  }
+  let data = {
+    follower_id: req.userId,
+    user_id: req.params.userId
+  };
+  let newFollower = new Follower(data);
+  Follower.insertFollower(newFollower, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
 };
 
 exports.deleteFollower = (req, res) => {
-  if (!req.body.user_id) {
-    res.status(400).json({ error: "User ID not specified" });
-  } else {
-    Follower.deleteFollower(
-      req.params.followerId,
-      req.body.user_id,
-      (err, msg) => {
-        if (err) res.json(err);
-        else res.json(msg);
-      }
-    );
-  }
+  Follower.deleteFollower(req.userId, req.params.userId, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
 };

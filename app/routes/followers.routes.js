@@ -3,11 +3,12 @@ let followerController = require("../controllers/follower.controller");
 let routes = app => {
   app.route("/api/v1/followers").get(followerController.getAllFollowers); // To be removed
 
-  //User id to be sent in the request body
+  // userId -> Id of user to be followed
+  // followerId -> Id of the follower, obtained from auth token
   app
-    .route("/api/v1/followers/:followerId")
-    .post(followerController.insertFollower)
-    .delete(followerController.deleteFollower);
+    .route("/api/v1/followers/:userId")
+    .post(auth, followerController.insertFollower)
+    .delete(auth, followerController.deleteFollower);
 };
 
 module.exports = routes;
