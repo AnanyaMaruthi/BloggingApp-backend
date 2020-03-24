@@ -66,6 +66,24 @@ Article.getAllArticles = function(result) {
   );
 };
 
+// Search all articles
+// Sending static data
+Article.searchAllArticles = function(searchString, result) {
+  conn.query(
+    `SELECT *,"True" as bookmarked
+     FROM articles WHERE MATCH(title,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    (err, res) => {
+      if (err) {
+        console.log("No articles found", err);
+        result(err, null);
+      } else {
+        console.log("Fetched all articles");
+        result(null, res);
+      }
+    }
+  );
+};
+
 // Sending static data
 // Get article by ID
 Article.findArticleById = function(article_id, result) {

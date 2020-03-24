@@ -48,14 +48,35 @@ Collection.getAllCollections = function(result) {
   conn.query(
     `
       SELECT *, 
-      "False" as is_owner,
-      "False" as is_author,
-      "True" as is_following
+      false as is_owner,
+      false as is_author,
+      true as is_following
       FROM collections
     `,
     (err, res) => {
       if (err) {
         console.log("Error getting collections: ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched all collections");
+        result(null, res);
+      }
+    }
+  );
+};
+
+// Search all collections
+Collection.searchAllCollections = function(searchString, result) {
+  conn.query(
+    `SELECT *,
+    false as is_owner,
+    false as is_author,
+    true as is_following 
+    FROM collections
+    WHERE MATCH(collection_name,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    (err, res) => {
+      if (err) {
+        console.log("No collections found", err);
         result(err, null);
       } else {
         console.log("Fetched all collections");

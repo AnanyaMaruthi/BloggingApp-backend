@@ -113,6 +113,29 @@ User.getAllUsers = function(result) {
   );
 };
 
+// Search all users
+// get follower and following
+// Sending static data
+User.searchAllUsers = function(searchString, result) {
+  console.log("model");
+  conn.query(
+    `SELECT 
+      user_id,username,profile_image_url,
+      true as following
+    FROM users 
+    WHERE MATCH(username, about) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    (err, res) => {
+      if (err) {
+        console.log("No users found ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched all users");
+        result(null, res);
+      }
+    }
+  );
+};
+
 // Get user by ID
 User.findUserById = function(user_id, result) {
   conn.query(
@@ -234,6 +257,7 @@ User.getFollowing = function(user_id, result) {
 
 // Get user's collections
 // sending static data
+// combine with authored collections and send
 User.getUserOwnedCollections = function(user_id, result) {
   conn.query(
     `
@@ -259,6 +283,7 @@ User.getUserOwnedCollections = function(user_id, result) {
 
 // Get user's authored articles
 // sending static data
+// not needed
 User.getUserAuthoredArticles = function(user_id, result) {
   conn.query(
     `

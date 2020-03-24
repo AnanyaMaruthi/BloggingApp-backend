@@ -2,10 +2,17 @@ let Collection = require("../models/collection.model");
 let CollectionFollower = require("../models/collectionFollower.model");
 
 exports.getAllCollections = (req, res) => {
-  Collection.getAllCollections((err, collections) => {
-    if (err) res.json(err);
-    else res.json(collections);
-  });
+  if (req.query.q) {
+    Collection.searchAllCollections(req.query.q, (err, collections) => {
+      if (err) res.json(err);
+      else res.json(collections);
+    });
+  } else {
+    Collection.getAllCollections((err, collections) => {
+      if (err) res.json(err);
+      else res.json(collections);
+    });
+  }
 };
 
 exports.findCollectionById = (req, res) => {

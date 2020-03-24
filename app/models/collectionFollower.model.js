@@ -20,6 +20,7 @@ CollectionFollower.getAll = function(result) {
 };
 
 // Get all followers
+// Just send count
 CollectionFollower.getFollowers = function(collection_id, result) {
   conn.query(
     `SELECT * FROM collection_followers WHERE collection_id = ${collection_id}`,
@@ -82,6 +83,8 @@ CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
 };
 
 // sending static data
+// get following collections
+// to be shown in profile page
 CollectionFollower.getCollections = function(user_id, result) {
   conn.query(
     `
@@ -110,6 +113,7 @@ CollectionFollower.getCollections = function(user_id, result) {
 
 // Fetch articles in followed collections
 // sending static data
+// yo be shown in home page
 CollectionFollower.getArticles = function(user_id, result) {
   conn.query(
     `SELECT 

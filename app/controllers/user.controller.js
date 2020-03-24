@@ -3,10 +3,17 @@ let CollectionFollower = require("../models/collectionFollower.model");
 let ArticleBookmark = require("../models/articleBookmarks.model");
 
 exports.getAllUsers = (req, res) => {
-  User.getAllUsers((err, users) => {
-    if (err) res.json(err);
-    else res.json(users);
-  });
+  if (req.query.q) {
+    User.searchAllUsers(req.query.q, (err, users) => {
+      if (err) res.json(err);
+      else res.json(users);
+    });
+  } else {
+    User.getAllUsers((err, users) => {
+      if (err) res.json(err);
+      else res.json(users);
+    });
+  }
 };
 
 exports.findUserById = (req, res) => {

@@ -1,10 +1,17 @@
 let Article = require("../models/article.model");
 
 exports.getAllArticles = (req, res) => {
-  Article.getAllArticles((err, articles) => {
-    if (err) res.json(err);
-    else res.json(articles);
-  });
+  if (req.query.q) {
+    Article.searchAllArticles(req.query.q, (err, articles) => {
+      if (err) res.json(err);
+      else res.json(articles);
+    });
+  } else {
+    Article.getAllArticles((err, articles) => {
+      if (err) res.json(err);
+      else res.json(articles);
+    });
+  }
 };
 
 exports.findArticleById = (req, res) => {

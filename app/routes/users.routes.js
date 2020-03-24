@@ -5,10 +5,9 @@ let routes = app => {
   app
     .route("/api/v1/users")
     // .get(auth, userController.getAllUsers)
+    // /api/v1/users?q=searchstring
     .get(userController.getAllUsers)
     .post(userController.insertUser);
-
-  app.route("/api/v1/users/search").get();
 
   app
     .route("/api/v1/users/:userId")
