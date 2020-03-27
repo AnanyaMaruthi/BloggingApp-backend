@@ -1,4 +1,5 @@
 let followerController = require("../controllers/follower.controller");
+let auth = require("../middleware/auth");
 
 let routes = app => {
   app.route("/api/v1/followers").get(followerController.getAllFollowers); // To be removed

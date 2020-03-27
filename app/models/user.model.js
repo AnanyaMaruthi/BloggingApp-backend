@@ -165,7 +165,7 @@ User.searchAllUsers = function(my_user_id, searchString, result) {
 };
 
 // function to get user profile
-User.findUserById = function(my_user_id, result) {
+User.getUserProfile = function(my_user_id, result) {
   conn.query(
     `
     SELECT    user_tbl.username,
@@ -349,7 +349,7 @@ User.getFollowing = function(my_user_id, result) {
     SELECT    following_tbl.user_id,
               following_tbl.username,
               following_tbl.email,
-              following_tbl.proofile_image_url,
+              following_tbl.profile_image_url,
               true as is_following
     FROM       users user_tbl
     INNER JOIN followers user_follower_tbl
@@ -372,7 +372,6 @@ User.getFollowing = function(my_user_id, result) {
 };
 
 // Get user's collections
-// sending static data
 // combine with authored collections and send
 User.getUserOwnedCollections = function(my_user_id, result) {
   conn.query(

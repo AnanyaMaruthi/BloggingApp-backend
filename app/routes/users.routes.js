@@ -29,7 +29,9 @@ let routes = app => {
     .route("/api/v1/user/followers")
     .get(auth, userController.getUserFollowers);
 
-  app.route("/api/v1/userfollowing").get(auth, userController.getUserFollowing);
+  app
+    .route("/api/v1/user/following")
+    .get(auth, userController.getUserFollowing);
 
   // Article Bookmarks
   // All bookmarks. Delete later
