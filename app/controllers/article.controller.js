@@ -53,7 +53,7 @@ exports.updateKudos = (req, res) => {
   if (!req.body) {
     res.status(400).json({ error: "Request body empty" });
   }
-  Article.updateKudos(req.params.articleId, req.body.kudos, (err, res) => {
+  Article.updateKudos(req.params.articleId, req.body.kudos, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
   });

@@ -206,7 +206,7 @@ Article.updateKudos = function(article_id, kudos, result) {
   conn.query(
     `
     UPDATE articles
-    SET   kudos = ${kudos}
+    SET   kudos_count = ${kudos}
     WHERE  article_id='${article_id}'
     `,
     (err, res) => {
