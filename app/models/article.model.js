@@ -125,7 +125,16 @@ Article.searchAllArticles = function(my_user_id, searchString, result) {
 Article.findArticleById = function(my_user_id, article_id, result) {
   conn.query(
     `
-    SELECT    *,
+    SELECT    articles.article_id,
+              articles.collection_id,
+              articles.user_id,
+              articles.title,
+              articles.content,
+              articles.image_path,
+              articles.kudos_count,
+              articles.date_created,
+              articles.date_updated,
+              articles.tags,
               CASE
                         WHEN ab.user_id IS NULL THEN false
                         ELSE true
