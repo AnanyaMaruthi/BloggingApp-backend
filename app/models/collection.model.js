@@ -136,14 +136,15 @@ Collection.searchAllCollections = function(my_user_id, searchString, result) {
 };
 
 // Get Collection by ID
-// sending static data
 Collection.findCollectionById = function(my_user_id, collection_id, result) {
-  // Get authors also
   conn.query(
     `
     SELECT    
               collections.collection_id,
               collections.user_id,
+              collections.collection_name,
+              collections.image_url,
+              collections.description,
               CASE
                         WHEN ca.author_id IS NULL THEN false
                         ELSE true
@@ -261,7 +262,7 @@ Collection.getArticles = function(my_user_id, collection_id, result) {
               articles.collection_id,
               articles.title,
               articles.date_created,
-              articles.image_path
+              articles.image_path,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
