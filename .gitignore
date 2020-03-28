@@ -3,3 +3,4 @@ test.js
 config.js
 npm-debug.log
 app/models/tester.js
+public/images/*
