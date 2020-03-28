@@ -9,6 +9,8 @@ const followerRoutes = require("./app/routes/followers.routes");
 const loginRoutes = require("./app/routes/login.routes");
 const searchRoutes = require("./app/routes/search.routes");
 
+const upload = require("./app/middleware/uploads");
+
 const app = express();
 // app.use(cors);
 
@@ -22,6 +24,17 @@ app.get("/", (req, res) => {
 
 app.route("/haha").get((req, res) => {
   res.send("you at haha");
+});
+
+app.route("/trial").post(upload.single("test"), (req, res) => {
+  // console.log(req.file.filename);
+  if (req.image_url) {
+    console.log(req.image_url);
+    // send image_url with update query.
+    // if !req.image_url, use the data sent
+  }
+
+  res.send("ok");
 });
 
 loginRoutes(app);
