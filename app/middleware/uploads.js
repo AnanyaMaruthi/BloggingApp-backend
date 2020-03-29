@@ -8,8 +8,8 @@ const storage = multer.diskStorage({
   filename: function(req, file, callback) {
     let filename =
       file.fieldname + "-" + Date.now() + path.extname(file.originalname);
-    let image_url = "http://localhost:3000/static/images/" + filename;
-    req.image_url = image_url;
+    let image_path = "http://localhost:3000/static/images/" + filename;
+    req.image_path = image_path;
     callback(null, filename);
   }
 });
