@@ -5,10 +5,8 @@ const key = config.key;
 
 let auth = async (req, res, next) => {
   let token = req.header("Authorization");
-  console.log(token);
   try {
     let data = jwt.verify(token, key, { algorithm: "HS256" });
-    console.log(data);
     req.userId = data.user_id;
     req.token = token;
     next();
