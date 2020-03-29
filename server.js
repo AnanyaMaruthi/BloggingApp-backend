@@ -10,7 +10,7 @@ const loginRoutes = require("./app/routes/login.routes");
 const searchRoutes = require("./app/routes/search.routes");
 
 const upload = require("./app/middleware/uploads");
-
+const auth = require("./app/middleware/auth");
 const app = express();
 // app.use(cors);
 
@@ -26,10 +26,11 @@ app.route("/haha").get((req, res) => {
   res.send("you at haha");
 });
 
-app.route("/trial").post(upload.single("test"), (req, res) => {
+app.route("/trial").post(auth, upload.single("test"), (req, res) => {
   // console.log(req.file.filename);
-  if (req.image_url) {
-    console.log(req.image_url);
+  console.log(req.body.lala);
+  if (req.image_path) {
+    console.log(req.image_path);
     // send image_url with update query.
     // if !req.image_url, use the data sent
   }
