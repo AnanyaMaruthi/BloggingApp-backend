@@ -1,4 +1,5 @@
 let auth = require("../middleware/auth");
+let upload = require("../middleware/uploads");
 let userController = require("../controllers/user.controller");
 
 let routes = app => {
@@ -8,7 +9,7 @@ let routes = app => {
   app
     .route("/api/v1/user")
     .get(auth, userController.getUserProfile)
-    .patch(auth, userController.updateUser)
+    .patch(auth, upload.single("profile_image"), userController.updateUser)
     .delete(auth, userController.deleteUser);
 
   // Get other users

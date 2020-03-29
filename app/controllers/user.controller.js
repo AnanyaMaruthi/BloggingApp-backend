@@ -46,7 +46,17 @@ exports.updateUser = (req, res) => {
   if (!req.body) {
     res.status(400).json({ error: "Request body empty" });
   }
-  let user = new User(req.body);
+  let data = {
+    username: req.body.username,
+    about: req.body.about,
+    profile_image_url: req.body.profile_image_url
+  };
+  // if upload successful, update image url
+  if (req.image_path) {
+    data.profile_image_url = req.image_path;
+  }
+  console.log(data);
+  let user = new User(data);
   User.patchUser(req.userId, user, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
