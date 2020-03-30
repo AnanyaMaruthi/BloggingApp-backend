@@ -27,6 +27,11 @@ let routes = app => {
     .get(collectionController.getFollowers)
     .post(collectionController.insertFollower)
     .delete(collectionController.deleteFollower);
+
+  app
+    .route("/api/v1/collections/:collectionId/authors/:authorId")
+    .post(auth, collectionController.addAuthor)
+    .delete(auth, collectionController.deleteAuthor);
 };
 
 module.exports = routes;

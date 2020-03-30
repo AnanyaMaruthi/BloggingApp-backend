@@ -1,5 +1,6 @@
 let Collection = require("../models/collection.model");
 let CollectionFollower = require("../models/collectionFollower.model");
+let CollectionAuthor = require("../models/collectionAuthor.model");
 
 exports.getAllCollections = (req, res) => {
   if (req.query.q) {
@@ -121,6 +122,31 @@ exports.deleteFollower = (req, res) => {
   CollectionFollower.deleteFollower(
     req.params.collectionId,
     req.userId,
+    (err, msg) => {
+      if (err) res.json(err);
+      else res.json(msg);
+    }
+  );
+};
+
+// Add author
+exports.addAuthor = (req, res) => {
+  let data = {
+    collection_id: req.params.collectionId,
+    author_id: req.params.authorId
+  };
+  let newCollectionAuthor = new CollectionAuthor(data);
+  CollectionAuthor.insertAuthor(newCollectionAuthor, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
+// Delete author
+exports.deleteAuthor = (req, res) => {
+  CollectionAuthor.deleteAuthor(
+    req.params.collectionId,
+    req.params.authorId,
     (err, msg) => {
       if (err) res.json(err);
       else res.json(msg);
