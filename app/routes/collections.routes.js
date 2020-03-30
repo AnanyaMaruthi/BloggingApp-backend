@@ -25,8 +25,8 @@ let routes = app => {
   app
     .route("/api/v1/collections/:collectionId/followers")
     .get(collectionController.getFollowers)
-    .post(collectionController.insertFollower)
-    .delete(collectionController.deleteFollower);
+    .post(auth, collectionController.insertFollower)
+    .delete(auth, collectionController.deleteFollower);
 
   app
     .route("/api/v1/collections/:collectionId/authors/:authorId")
