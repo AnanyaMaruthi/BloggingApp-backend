@@ -12,6 +12,7 @@ const Article = function(article) {
   this.kudos_count = article.kudos_count;
   this.date_created = article.date_created;
   this.date_updated = article.date_updated;
+  this.tags = article.tags;
 };
 
 // Insert Article
@@ -174,7 +175,8 @@ Article.patchArticle = function(my_user_id, article_id, article, result) {
           content='${article.content}', 
           published=${article.published}, 
           image_path='${article.image_path}', 
-          date_updated='${article.date_updated}' 
+          date_updated='${article.date_updated}',
+          tags='${article.tags}'
     WHERE  article_id='${article_id}' and user_id = ${my_user_id}
     `,
     (err, res) => {
