@@ -130,8 +130,6 @@ User.getAllUsers = function(my_user_id, result) {
 };
 
 // Search all users
-// get follower and following
-// Sending static data
 User.searchAllUsers = function(my_user_id, searchString, result) {
   console.log("model");
   conn.query(
@@ -164,7 +162,7 @@ User.searchAllUsers = function(my_user_id, searchString, result) {
   );
 };
 
-// function to get user profile
+// Get user profile
 User.getUserProfile = function(my_user_id, result) {
   conn.query(
     `
