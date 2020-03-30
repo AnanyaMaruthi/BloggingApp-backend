@@ -484,4 +484,69 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
   );
 };
 
+// Get user's feed
+// Articles from following collections + articles authored by following users
+User.getUserFeed = function(my_user_id, result) {
+  conn.query(
+    `
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path,
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab
+    ON        articles.article_id = ab.article_id
+    INNER JOIN
+              (
+                    SELECT collection_id
+                    FROM   collection_followers
+                    WHERE  collection_followers.user_id = ${my_user_id}) followers
+    ON        articles.collection_id = followers.collection_id
+    UNION
+    SELECT    articles.article_id,
+              articles.user_id,
+              articles.collection_id,
+              articles.title,
+              articles.date_created,
+              articles.image_path,
+              case
+                        when ab.user_id IS NULL THEN false
+                        ELSE true
+              END AS is_bookmarked
+    FROM      articles
+    LEFT JOIN
+              (
+                    SELECT *
+                    FROM   article_bookmarks
+                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON        articles.article_id = ab.article_id
+    INNER JOIN
+              (
+                    SELECT user_id
+                    FROM   followers
+                    WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON        articles.user_id = followers.user_id
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching collection articles: ", err);
+        result(err, null);
+      } else {
+        console.log("Collection articles fetched ");
+        result(null, res);
+      }
+    }
+  );
+};
+
 module.exports = User;

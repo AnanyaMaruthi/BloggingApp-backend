@@ -183,3 +183,10 @@ exports.login = (req, res) => {
     else res.json(msg);
   });
 };
+
+exports.getUserFeed = (req, res) => {
+  User.getUserFeed(req.userId, (err, articles) => {
+    if (err) res.json(err);
+    else res.json(articles);
+  });
+};

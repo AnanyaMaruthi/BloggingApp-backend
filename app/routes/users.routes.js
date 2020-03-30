@@ -18,6 +18,9 @@ let routes = app => {
   // Get other users
   app.route("/api/v1/users/:userId").get(auth, userController.findUserById);
 
+  // user feed
+  app.route("/api/v1/user/feed").get(auth, userController.getUserFeed);
+
   // User owned or authored collections
   app
     .route("/api/v1/user/collections")
