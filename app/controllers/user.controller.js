@@ -24,6 +24,22 @@ exports.getUserProfile = (req, res) => {
   });
 };
 
+exports.changePassword = (req, res) => {
+  if (Object.keys(req.body).length === 0) {
+    res.status(400).json({ error: "Request body empty" });
+  } else {
+    User.changePassword(
+      req.userId,
+      req.body.oldPassword,
+      req.body.newPassword,
+      (err, msg) => {
+        if (err) res.json(err);
+        else res.json(msg);
+      }
+    );
+  }
+};
+
 exports.findUserById = (req, res) => {
   User.findUserById(req.userId, req.params.userId, (err, user) => {
     if (err) res.json(err);

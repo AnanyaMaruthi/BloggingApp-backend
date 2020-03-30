@@ -12,6 +12,9 @@ let routes = app => {
     .patch(auth, upload.single("profile_image"), userController.updateUser)
     .delete(auth, userController.deleteUser);
 
+  // Change password
+  app.route("/api/v1/user/password").patch(auth, userController.changePassword);
+
   // Get other users
   app.route("/api/v1/users/:userId").get(auth, userController.findUserById);
 

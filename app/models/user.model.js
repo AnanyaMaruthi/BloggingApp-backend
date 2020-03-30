@@ -202,6 +202,46 @@ User.getUserProfile = function(my_user_id, result) {
   );
 };
 
+User.changePassword = function(my_user_id, old_password, new_password, result) {
+  conn.query(
+    `
+    SELECT password
+    FROM users 
+    WHERE user_id = ${my_user_id}
+    `,
+    (err, res) => {
+      if (err) {
+        console.log(err);
+        result(err, null);
+      } else if (res.length == 0) {
+        console.log("User not found");
+        result({ error: "Invalid user" }, null);
+      } else if (bcrypt.compareSync(old_password, res[0]["password"])) {
+        let passwordHash = bcrypt.hashSync(new_password, saltRounds);
+        conn.query(
+          `
+          UPDATE users SET password = '${passwordHash}'
+          WHERE user_id = ${my_user_id}
+          `,
+          (err, res) => {
+            if (err) {
+              result(err, null);
+            } else {
+              let msg = { message: "Successfully changed password" };
+              result(null, msg);
+            }
+          }
+        );
+      } else {
+        let error = {
+          error: "Invalid password"
+        };
+        result(error, null);
+      }
+    }
+  );
+};
+
 // Get user by ID
 User.findUserById = function(my_user_id, user_id, result) {
   conn.query(
