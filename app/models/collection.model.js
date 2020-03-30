@@ -6,6 +6,7 @@ let Collection = function(collection) {
   this.user_id = collection.user_id;
   this.image_url = collection.image_url;
   this.description = collection.description;
+  this.tags = collection.tags;
 };
 
 // Insert Collection
@@ -211,7 +212,8 @@ Collection.patchCollection = function(
     `
     UPDATE collections
     SET    description = '${collection.description}', 
-           image_url = '${collection.image_url}' 
+           image_url = '${collection.image_url}',
+           tags = '${collection.tags}'
     WHERE  collection_id = '${collection_id}' 
     AND    user_id = ${my_user_id}
     `,
