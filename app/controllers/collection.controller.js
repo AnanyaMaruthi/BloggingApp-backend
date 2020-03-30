@@ -35,7 +35,13 @@ exports.insertCollection = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let newCollection = new Collection(req.body);
+
   newCollection.user_id = req.userId;
+  if (req.image_path) {
+    newCollection.image_url = req.image_path;
+  } else {
+    newCollection.image_url = "";
+  }
   Collection.insertCollection(newCollection, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
@@ -47,6 +53,10 @@ exports.updateCollection = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let collection = new Collection(req.body);
+  if (req.image_path) {
+    collection.image_url = req.image_path;
+  }
+  console.log(collection);
   Collection.patchCollection(
     req.userId,
     req.params.collectionId,
