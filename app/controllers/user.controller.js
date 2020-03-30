@@ -103,8 +103,8 @@ exports.getUserFollowing = (req, res) => {
 };
 
 // Get user owned collections
-exports.getUserOwnedCollections = (req, res) => {
-  User.getUserOwnedCollections(req.userId, (err, collections) => {
+exports.getUserCollections = (req, res) => {
+  User.getUserCollections(req.userId, (err, collections) => {
     if (err) res.json(err);
     else res.json(collections);
   });

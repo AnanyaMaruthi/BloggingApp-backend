@@ -342,7 +342,6 @@ User.deleteUser = function(my_user_id, result) {
 };
 
 // Get followers
-// Add is_following field
 User.getFollowers = function(my_user_id, result) {
   conn.query(
     `
@@ -410,39 +409,31 @@ User.getFollowing = function(my_user_id, result) {
 };
 
 // Get user's collections
-// combine with authored collections and send
-User.getUserOwnedCollections = function(my_user_id, result) {
+// owned or authored
+User.getUserCollections = function(my_user_id, result) {
   conn.query(
     `
-    SELECT    *,
-              collections.collection_id,
+    SELECT    collections.collection_id,
               collections.user_id,
-              CASE
-                        WHEN ca.author_id IS NULL THEN false
-                        ELSE true
-              END AS is_author,
-              CASE
-                        WHEN collections.user_id = ${my_user_id} THEN true
-                        ELSE false 
-              END AS is_owner, 
-              CASE 
-                        WHEN followers.user_id IS NULL THEN false
-                        ELSE true 
-              END AS is_following 
+              collections.collection_name,
+              collections.image_url,
+              true AS is_owner,
+              true AS is_author
     FROM      collections
-    LEFT JOIN 
-              ( 
-                    SELECT * 
-                    FROM   collection_authors 
-                    WHERE  collection_authors.author_id = ${my_user_id}) ca 
-    ON        collections.collection_id = ca.collection_id 
-    LEFT JOIN 
-              ( 
-                    SELECT * 
-                    FROM   collection_followers 
-                    WHERE  collection_followers.user_id = ${my_user_id}) followers 
-    ON        collections.collection_id = followers.collection_id 
     WHERE collections.user_id = ${my_user_id}
+    UNION
+    SELECT    collections.collection_id,
+              collections.user_id,
+              collections.collection_name,
+              collections.image_url,
+              false AS is_owner,
+              true AS is_author
+    FROM collections
+    INNER JOIN (
+      SELECT * FROM collection_authors WHERE author_id = '${my_user_id}'
+    ) authors
+    ON collections.collection_id = authors.collection_id
+
     `,
     (err, res) => {
       if (err) {

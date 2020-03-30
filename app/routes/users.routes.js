@@ -18,11 +18,10 @@ let routes = app => {
   // Get other users
   app.route("/api/v1/users/:userId").get(auth, userController.findUserById);
 
+  // User owned or authored collections
   app
     .route("/api/v1/user/collections")
-    .get(auth, userController.getUserOwnedCollections);
-
-  // Author collections ?
+    .get(auth, userController.getUserCollections);
 
   app
     .route("/api/v1/user/articles")
