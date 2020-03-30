@@ -173,7 +173,6 @@ Article.patchArticle = function(my_user_id, article_id, article, result) {
     SET   collection_id='${article.collection_id}', 
           title='${article.title}', 
           content='${article.content}', 
-          published=${article.published}, 
           image_path='${article.image_path}', 
           date_updated='${article.date_updated}',
           tags='${article.tags}'
