@@ -27,6 +27,11 @@ exports.insertArticle = (req, res) => {
   }
   let newArticle = new Article(req.body);
   newArticle.user_id = req.userId;
+  if (req.image_path) {
+    newArticle.image_path = req.image_path;
+  } else {
+    newArticle.image_path = "";
+  }
   Article.insertArticle(newArticle, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
@@ -38,6 +43,9 @@ exports.updateArticle = (req, res) => {
     res.status(400).json({ error: "Request body empty" });
   }
   let article = new Article(req.body);
+  if (req.image_path) {
+    article.image_path = req.image_path;
+  }
   Article.patchArticle(
     req.userId,
     req.params.articleId,
