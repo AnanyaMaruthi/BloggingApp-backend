@@ -104,7 +104,7 @@ exports.getUserFollowing = (req, res) => {
 
 // Get user owned collections
 exports.getUserCollections = (req, res) => {
-  User.getUserCollections(req.userId, (err, collections) => {
+  User.getUserCollections(req.params.userId, (err, collections) => {
     if (err) res.json(err);
     else res.json(collections);
   });
@@ -112,7 +112,7 @@ exports.getUserCollections = (req, res) => {
 
 // Get user authored articles
 exports.getUserAuthoredArticles = (req, res) => {
-  User.getUserAuthoredArticles(req.userId, (err, articles) => {
+  User.getUserAuthoredArticles(req.params.userId, (err, articles) => {
     if (err) res.json(err);
     else res.json(articles);
   });

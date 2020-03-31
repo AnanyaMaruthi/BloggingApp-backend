@@ -23,11 +23,11 @@ let routes = app => {
 
   // User owned or authored collections
   app
-    .route("/api/v1/user/collections")
+    .route("/api/v1/user/:userId/collections")
     .get(auth, userController.getUserCollections);
 
   app
-    .route("/api/v1/user/articles")
+    .route("/api/v1/user/:userId/articles")
     .get(auth, userController.getUserAuthoredArticles);
 
   //   Followers and following
