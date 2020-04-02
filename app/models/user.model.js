@@ -417,6 +417,7 @@ User.getUserCollections = function(my_user_id, result) {
               collections.user_id,
               collections.collection_name,
               collections.image_url,
+              collections.description,
               true AS is_owner,
               true AS is_author
     FROM      collections
@@ -426,6 +427,7 @@ User.getUserCollections = function(my_user_id, result) {
               collections.user_id,
               collections.collection_name,
               collections.image_url,
+              collections.description,
               false AS is_owner,
               true AS is_author
     FROM collections
