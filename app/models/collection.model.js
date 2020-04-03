@@ -98,6 +98,7 @@ Collection.searchAllCollections = function(my_user_id, searchString, result) {
               collections.user_id,
               collections.collection_name,
               collections.image_url,
+              collections.description,
               CASE
                         WHEN ca.author_id IS NULL THEN false
                         ELSE true
