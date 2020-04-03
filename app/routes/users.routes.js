@@ -9,7 +9,7 @@ let routes = app => {
   app
     .route("/api/v1/user")
     .get(auth, userController.getUserProfile)
-    .patch(auth, upload.single("profile_image"), userController.updateUser)
+    .patch(auth, upload.single("image"), userController.updateUser)
     .delete(auth, userController.deleteUser);
 
   // Change password
