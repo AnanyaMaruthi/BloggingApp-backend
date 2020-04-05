@@ -158,13 +158,7 @@ Collection.findCollectionById = function(my_user_id, collection_id, result) {
               CASE 
                         WHEN followers.user_id IS NULL THEN false
                         ELSE true 
-              END AS is_following,
-              GROUP_CONCAT 
-                        (
-                              CONCAT(authors_list.author_id, ':', authors_list.username)
-                              -- ORDER BY collections.collection_id
-                              SEPARATOR ';'
-                        ) as authors
+              END AS is_following
     FROM      collections 
     LEFT JOIN 
               ( 
@@ -178,16 +172,6 @@ Collection.findCollectionById = function(my_user_id, collection_id, result) {
                     FROM   collection_followers 
                     WHERE  collection_followers.user_id = ${my_user_id}) followers 
     ON        collections.collection_id = followers.collection_id 
-    LEFT JOIN
-              (
-                    SELECT  username, 
-                            author_id, 
-                            collection_id
-                    FROM users, collection_authors
-                    WHERE users.user_id = collection_authors.author_id
-                    AND collection_authors.collection_id = '${collection_id}') authors_list
-    ON        authors_list.collection_id = collections.collection_id
-    
     WHERE collections.collection_id = '${collection_id}'
     `,
     (err, res) => {
