@@ -149,7 +149,8 @@ User.searchAllUsers = function(my_user_id, searchString, result) {
                     FROM   followers
                     WHERE  followers.follower_id = ${my_user_id}) followers 
     ON        users.user_id = followers.user_id
-    WHERE     MATCH(users.username, users.about) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)`,
+    WHERE     MATCH(users.username, users.about) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE) AND users.user_id <> ${my_user_id}
+    `,
     (err, res) => {
       if (err) {
         console.log("No users found ", err);
