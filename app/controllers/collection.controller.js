@@ -21,14 +21,38 @@ exports.getAllCollections = (req, res) => {
 };
 
 exports.findCollectionById = (req, res) => {
-  Collection.findCollectionById(
-    req.userId,
-    req.params.collectionId,
-    (err, collection) => {
-      if (err) res.json(err);
-      else res.json(collection);
-    }
-  );
+  let collectionQuery = new Promise((resolve, reject) => {
+    Collection.findCollectionById(
+      req.userId,
+      req.params.collectionId,
+      (err, collection) => {
+        if (err) reject(err);
+        else resolve(collection);
+      }
+    );
+  });
+
+  let authorQuery = new Promise((resolve, reject) => {
+    Collection.getCollectionAuthors(
+      req.userId,
+      req.params.collectionId,
+      (err, authors) => {
+        if (err) reject(err);
+        else resolve(authors);
+      }
+    );
+  });
+
+  Promise.all([collectionQuery, authorQuery])
+    .then(results => {
+      res.json({
+        collection: results[0],
+        authors: results[1]
+      });
+    })
+    .catch(err => {
+      res.send(err);
+    });
 };
 
 exports.insertCollection = (req, res) => {

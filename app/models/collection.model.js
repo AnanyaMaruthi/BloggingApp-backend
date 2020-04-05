@@ -202,6 +202,31 @@ Collection.findCollectionById = function(my_user_id, collection_id, result) {
   );
 };
 
+Collection.getCollectionAuthors = function(my_user_id, collection_id, result) {
+  conn.query(
+    `
+    SELECT user_id,
+           username,
+           email,
+           profile_image_url
+    FROM   users
+           INNER JOIN (SELECT *
+                      FROM   collection_authors
+                      WHERE  collection_id = '${collection_id}') authors 
+                  ON users.user_id = authors.author_id
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error getting authors: ", err);
+        result(err, null);
+      } else {
+        console.log("Fetched authors");
+        result(null, res);
+      }
+    }
+  );
+};
+
 // Patch Collection
 Collection.patchCollection = function(
   my_user_id,
