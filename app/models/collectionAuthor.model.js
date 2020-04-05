@@ -53,4 +53,31 @@ CollectionAuthor.deleteAuthor = function(collection_id, author_id, result) {
   );
 };
 
+// Delete multiple
+CollectionAuthor.deleteMultipleAuthors = function(
+  collection_id,
+  authors,
+  result
+) {
+  conn.query(
+    `
+    DELETE FROM collection_authors 
+    WHERE  collection_id = '${collection_id}' AND author_id IN ${authors}
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error deleting author: ", err);
+        result(err, null);
+      } else {
+        console.log(res);
+        console.log("Successfully deleted author");
+        let responseMessage = {
+          message: "Successfully deleted author"
+        };
+        result(null, responseMessage);
+      }
+    }
+  );
+};
+
 module.exports = CollectionAuthor;

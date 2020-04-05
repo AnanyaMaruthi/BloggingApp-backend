@@ -29,9 +29,9 @@ let routes = app => {
     .delete(auth, collectionController.deleteFollower);
 
   app
-    .route("/api/v1/collections/:collectionId/authors/:authorId")
-    .post(auth, collectionController.addAuthor)
-    .delete(auth, collectionController.deleteAuthor);
+    .route("/api/v1/collections/:collectionId/authors/")
+    // .post(auth, collectionController.addAuthor)
+    .delete(auth, collectionController.deleteMultipleAuthors);
 };
 
 module.exports = routes;

@@ -177,3 +177,20 @@ exports.deleteAuthor = (req, res) => {
     }
   );
 };
+
+// Delete multiple author
+exports.deleteMultipleAuthors = (req, res) => {
+  if (!req.body.authors) {
+    res.status(400).json({ error: "no Authors specified" });
+  }
+  let authors = req.body.authors.join(",");
+  authors = "(" + authors + ")";
+  CollectionAuthor.deleteMultipleAuthors(
+    req.params.collectionId,
+    authors,
+    (err, msg) => {
+      if (err) res.json(err);
+      else res.json(msg);
+    }
+  );
+};
