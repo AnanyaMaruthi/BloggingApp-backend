@@ -4,11 +4,19 @@ let ArticleBookmark = require("../models/articleBookmarks.model");
 
 exports.getAllUsers = (req, res) => {
   if (req.query.q) {
+    // Search users
     User.searchAllUsers(req.userId, req.query.q, (err, users) => {
       if (err) res.json(err);
       else res.json(users);
     });
+  } else if (req.query.prompt) {
+    // Suggest users
+    User.getUserSuggestions(req.query.prompt, (err, users) => {
+      if (err) res.json(err);
+      else res.json(users);
+    });
   } else {
+    // Get all users
     // Delete later
     User.getAllUsers(req.userId, (err, users) => {
       if (err) res.json(err);

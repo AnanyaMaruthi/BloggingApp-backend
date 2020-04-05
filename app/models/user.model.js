@@ -551,4 +551,28 @@ User.getUserFeed = function(my_user_id, result) {
   );
 };
 
+// Get user suggestions
+User.getUserSuggestions = function(searchPrompt, result) {
+  conn.query(
+    `
+    SELECT    user_id,
+              username,
+              email,
+              profile_image_url
+    FROM      users
+    WHERE     username like '${searchPrompt}%'
+    LIMIT     5    
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error fetching suggestions: ", err);
+        result(err, null);
+      } else {
+        console.log("Suggestions fetched ");
+        result(null, res);
+      }
+    }
+  );
+};
+
 module.exports = User;
