@@ -31,6 +31,35 @@ CollectionAuthor.insertAuthor = function(newCollectionAuthor, result) {
   );
 };
 
+// Insert multiple
+CollectionAuthor.insertMultipleAuthors = function(authors, result) {
+  conn.query(
+    `INSERT INTO collection_authors VALUES ? `,
+    [authors],
+    (err, res) => {
+      if (err) {
+        console.log("Error inserting author: ", err);
+        let error = err;
+        if (
+          err.code == "ER_NO_REFERENCED_ROW_2" ||
+          err.code == "ER_DUP_ENTRY"
+        ) {
+          error = {
+            error: "Record exists"
+          };
+        }
+        result(error, null);
+      } else {
+        let responseMessage = {
+          message: "Successfully inserted authors"
+        };
+        console.log("Successfully inserted authors");
+        result(null, responseMessage);
+      }
+    }
+  );
+};
+
 // Delete author
 CollectionAuthor.deleteAuthor = function(collection_id, author_id, result) {
   conn.query(

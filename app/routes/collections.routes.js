@@ -30,7 +30,7 @@ let routes = app => {
 
   app
     .route("/api/v1/collections/:collectionId/authors/")
-    // .post(auth, collectionController.addAuthor)
+    .post(auth, collectionController.addMultipleAuthors)
     .delete(auth, collectionController.deleteMultipleAuthors);
 };
 

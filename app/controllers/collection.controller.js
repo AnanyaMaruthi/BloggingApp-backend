@@ -166,6 +166,21 @@ exports.addAuthor = (req, res) => {
   });
 };
 
+// Add multiple authors
+exports.addMultipleAuthors = (req, res) => {
+  if (!req.body.authors) {
+    res.status(400).json({ error: "Authors not specified" });
+  }
+  let data = [];
+  for (author_id of req.body.authors) {
+    data.push([req.params.collectionId, author_id]);
+  }
+  CollectionAuthor.insertMultipleAuthors(data, (err, msg) => {
+    if (err) res.json(err);
+    else res.json(msg);
+  });
+};
+
 // Delete author
 exports.deleteAuthor = (req, res) => {
   CollectionAuthor.deleteAuthor(
@@ -181,7 +196,7 @@ exports.deleteAuthor = (req, res) => {
 // Delete multiple author
 exports.deleteMultipleAuthors = (req, res) => {
   if (!req.body.authors) {
-    res.status(400).json({ error: "no Authors specified" });
+    res.status(400).json({ error: "Authors not specified" });
   }
   let authors = req.body.authors.join(",");
   authors = "(" + authors + ")";
