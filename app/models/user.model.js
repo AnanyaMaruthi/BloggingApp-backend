@@ -553,7 +553,7 @@ User.getUserFeed = function(my_user_id, result) {
 };
 
 // Get user suggestions
-User.getUserSuggestions = function(searchPrompt, result) {
+User.getUserSuggestions = function(my_user_id, searchPrompt, result) {
   conn.query(
     `
     SELECT    user_id,
@@ -561,7 +561,7 @@ User.getUserSuggestions = function(searchPrompt, result) {
               email,
               profile_image_url
     FROM      users
-    WHERE     username like '${searchPrompt}%'
+    WHERE     username like '${searchPrompt}%' AND user_id <> ${my_user_id}
     LIMIT     5    
     `,
     (err, res) => {

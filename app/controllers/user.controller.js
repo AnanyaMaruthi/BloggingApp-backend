@@ -11,7 +11,7 @@ exports.getAllUsers = (req, res) => {
     });
   } else if (req.query.prompt) {
     // Suggest users
-    User.getUserSuggestions(req.query.prompt, (err, users) => {
+    User.getUserSuggestions(req.userId, req.query.prompt, (err, users) => {
       if (err) res.json(err);
       else res.json(users);
     });
