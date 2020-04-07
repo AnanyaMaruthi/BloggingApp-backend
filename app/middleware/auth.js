@@ -12,7 +12,7 @@ let auth = async (req, res, next) => {
     next();
   } catch (err) {
     res.status(401);
-    res.send("Bad Token");
+    res.json({ error: true, message: "Token invalid" });
   }
 };
 
