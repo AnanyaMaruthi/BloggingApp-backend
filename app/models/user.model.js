@@ -19,34 +19,31 @@ let User = function(user) {
 // Sign up
 User.insertUser = function(newUser, result) {
   let passwordHash = bcrypt.hashSync(newUser.password, saltRounds);
-  newUser.password = passwordHash;
-  conn.query(`INSERT INTO users SET ? `, newUser, (err, res) => {
-    if (err) {
-      console.log("Error inserting user: ", err);
-      let error = err;
-      if (err.code == "ER_DUP_ENTRY") {
-        error = {
-          error: true,
-          message: "Account for the given email ID already exists"
-        };
+  conn.query(
+    `INSERT INTO users (username, email, password) VALUES ( ?, ?, ? ) `,
+    [newUser.username, newUser.email, passwordHash],
+    (err, res) => {
+      if (err) {
+        console.log("Error inserting user: ", err);
+        let error = err;
+        if (err.code == "ER_DUP_ENTRY") {
+          error = {
+            error: true,
+            message: "Account for the given email ID already exists"
+          };
+        }
+        result(error, null);
+      } else {
+        User.login(newUser.email, newUser.password, result);
       }
-
-      result(error, null);
-    } else {
-      let responseMessage = {
-        error: false,
-        message: "Successfully inserted user"
-      };
-      console.log("Successfully inserted user: ", newUser.email);
-      result(null, responseMessage);
     }
-  });
+  );
 };
 
 User.login = function(email, password, result) {
   conn.query(
     `
-    SELECT user_id, email, password 
+    SELECT user_id, email, password, username, profile_image_url
     FROM users
     WHERE email = '${email}'
   `,
@@ -59,7 +56,8 @@ User.login = function(email, password, result) {
         // Email not found
         if (res.length != 1) {
           let error = {
-            error: "Invalid email or password"
+            error: true,
+            message: "Invalid email or password"
           };
           result(error, null);
         } else {
@@ -68,13 +66,16 @@ User.login = function(email, password, result) {
           if (valid == true) {
             let payload = {
               user_id: res[0]["user_id"],
-              email: res[0]["email"]
+              email: res[0]["email"],
+              username: res[0]["username"],
+              profile_image_url: res[0]["profile_image_url"]
             };
             let token = jwt.sign(payload, key, {
               algorithm: "HS256",
               expiresIn: "15d"
             });
             let msg = {
+              error: false,
               login: true,
               token: token
             };
@@ -85,7 +86,8 @@ User.login = function(email, password, result) {
           // Password invalid
           else {
             let error = {
-              error: "Invalid email or password"
+              error: true,
+              message: "Invalid email or password"
             };
             console.log(res);
             result(error, null);
@@ -215,7 +217,7 @@ User.changePassword = function(my_user_id, old_password, new_password, result) {
         result(err, null);
       } else if (res.length == 0) {
         console.log("User not found");
-        result({ error: "Invalid user" }, null);
+        result({ error: true, message: "Invalid user" }, null);
       } else if (bcrypt.compareSync(old_password, res[0]["password"])) {
         let passwordHash = bcrypt.hashSync(new_password, saltRounds);
         conn.query(
@@ -225,16 +227,20 @@ User.changePassword = function(my_user_id, old_password, new_password, result) {
           `,
           (err, res) => {
             if (err) {
-              result(err, null);
+              result({ error: true, message: err }, null);
             } else {
-              let msg = { message: "Successfully changed password" };
+              let msg = {
+                error: false,
+                message: "Successfully changed password"
+              };
               result(null, msg);
             }
           }
         );
       } else {
         let error = {
-          error: "Invalid password"
+          error: true,
+          message: "Invalid password"
         };
         result(error, null);
       }
@@ -307,10 +313,11 @@ User.patchUser = function(my_user_id, user, result) {
     (err, res) => {
       if (err) {
         console.log("Error while updating: ", err);
-        result(err, null);
+        result({ error: true, message: err }, null);
       } else {
         console.log("Successfully updated user");
         let responseMessage = {
+          error: false,
           message: "Successfully updated user"
         };
         result(null, responseMessage);
@@ -329,10 +336,11 @@ User.deleteUser = function(my_user_id, result) {
     (err, res) => {
       if (err) {
         console.log("Error deleting user: ", err);
-        result(err, null);
+        result({ error: true, message: err }, null);
       } else {
         console.log("Successfully deleted user");
         let responseMessage = {
+          error: false,
           message: "Successfully deleted user"
         };
         result(null, responseMessage);

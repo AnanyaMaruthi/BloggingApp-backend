@@ -58,24 +58,27 @@ ArticleBookmark.addUserBookmark = function(newBookmark, result) {
     newBookmark,
     (err, res) => {
       if (err) {
-        console.log("Error inserting bookmark: ", err);
         let error = err;
         if (err.code == "ER_NO_REFERENCED_ROW_2") {
           error = {
-            error: "Foreign key constraint fails"
+            error: true,
+            message: "Foreign key constraint fails"
           };
         } else if (err.code == "ER_BAD_NULL_ERROR") {
           error = {
-            error: "Required fields are empty"
+            error: true,
+            message: "Required fields are empty"
           };
         } else if (err.code == "ER_DUP_ENTRY") {
           error = {
-            error: "Bookmark exists"
+            error: true,
+            message: "Bookmark exists"
           };
         }
         result(error, null);
       } else {
         let responseMessage = {
+          error: false,
           message: "Successfully added bookmark"
         };
         console.log("Successfully added bookmark");

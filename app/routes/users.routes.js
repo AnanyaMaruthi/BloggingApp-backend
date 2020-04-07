@@ -21,6 +21,15 @@ let routes = app => {
   // user feed
   app.route("/api/v1/user/feed").get(auth, userController.getUserFeed);
 
+  // Following collections
+  app
+    .route("/api/v1/user/following/collections")
+    .get(auth, userController.getFollowingCollections);
+
+  app
+    .route("/api/v1/user/following/collections/articles")
+    .get(auth, userController.getFollowingCollectionArticles);
+
   // User owned or authored collections
   app
     .route("/api/v1/user/:userId/collections")
@@ -51,15 +60,6 @@ let routes = app => {
     .route("/api/v1/user/bookmarks/:articleId")
     .post(auth, userController.addUserBookmark)
     .delete(auth, userController.removeUserBookmark);
-
-  // Following collections
-  app
-    .route("/api/v1/user/following/collections")
-    .get(auth, userController.getFollowingCollections);
-
-  app
-    .route("/api/v1/user/following/collections/articles")
-    .get(auth, userController.getFollowingCollectionArticles);
 };
 
 module.exports = routes;
