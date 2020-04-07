@@ -103,11 +103,13 @@ ArticleBookmark.deleteUserBookmark = function(my_user_id, article_id, result) {
         console.log("Error deleting bookmark");
         result(err, null);
       } else {
-        console.log("Deleted bookmark");
-        let responseMessage = {
-          message: "Successfully removed bookmark"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Bookmark not found", null);
+        } else {
+          console.log("Deleted bookmark");
+          let response = "Successfully removed bookmark";
+          result(null, response);
+        }
       }
     }
   );

@@ -180,8 +180,11 @@ exports.removeUserBookmark = (req, res) => {
     req.userId,
     req.params.articleId,
     (err, msg) => {
-      if (err) res.status(500).json({ error: true, message: err });
-      else res.status(200).json({ error: false, message: msg });
+      if (err) {
+        if (err == "Bookmark not found")
+          res.status(404).json({ error: true, message: err });
+        else res.status(500).json({ error: true, message: err });
+      } else res.status(200).json({ error: false, message: msg });
     }
   );
 };
