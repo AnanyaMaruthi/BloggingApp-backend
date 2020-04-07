@@ -25,25 +25,32 @@ Article.insertArticle = function(newArticle, result) {
     newArticle,
     (err, res) => {
       if (err) {
-        console.log("Error inserting article: ", err);
-        let error = err;
+        let error = {
+          error: true,
+          message: err
+        };
+        console.log("Error inserting article: ");
         if (err.code == "ER_DUP_ENTRY") {
           error = {
-            error: "Article ID exists"
+            error: true,
+            message: "Article ID exists"
           };
         } else if (err.code == "ER_BAD_NULL_ERROR") {
           error = {
-            error: "Required fields are empty"
+            error: true,
+            message: "Required fields are empty"
           };
         } else if (err.code == "ER_NO_REFERENCED_ROW_2") {
           error = {
-            error:
+            error: true,
+            message:
               "Invalid user ID or collection ID. Foreign key constraint fails"
           };
         }
         result(error, null);
       } else {
         let responseMessage = {
+          error: false,
           message: "Successfully inserted article"
         };
         console.log("Successfully inserted article: ", newArticle.title);
@@ -197,17 +204,43 @@ Article.patchArticle = function(my_user_id, article_id, article, result) {
           err.code == "ER_BAD_NULL_ERROR" ||
           err.code == "ER_BAD_FIELD_ERROR"
         ) {
-          error = {
-            error: "Required fields are empty"
-          };
+          error = "Required fields are empty";
         }
         result(error, null);
       } else {
-        console.log("Successfully updated article");
-        let responseMessage = {
-          message: "Successfully updated article"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Article not found", null);
+        } else {
+          console.log("Successfully updated article");
+          let response = "Successfully updated article";
+
+          result(null, response);
+        }
+      }
+    }
+  );
+};
+
+// Delete article
+Article.deleteArticle = function(my_user_id, article_id, result) {
+  conn.query(
+    `
+    DELETE FROM articles 
+    WHERE  article_id = '${article_id}' AND user_id = ${my_user_id}
+    `,
+    [article_id],
+    (err, res) => {
+      if (err) {
+        console.log("Error deleting article: ", err);
+        result(err, null);
+      } else {
+        if (res.affectedRows == 0) {
+          result("Article not found", null);
+        } else {
+          console.log("Successfully deleted article");
+          let response = "Successfully deleted article";
+          result(null, response);
+        }
       }
     }
   );
@@ -230,29 +263,6 @@ Article.updateKudos = function(article_id, kudos, result) {
         console.log("Successfully updated kudos");
         let responseMessage = {
           message: "Successfully updated kudos"
-        };
-        result(null, responseMessage);
-      }
-    }
-  );
-};
-
-// Delete article
-Article.deleteArticle = function(my_user_id, article_id, result) {
-  conn.query(
-    `
-    DELETE FROM articles 
-    WHERE  article_id = '${article_id}' AND user_id = ${my_user_id}
-    `,
-    [article_id],
-    (err, res) => {
-      if (err) {
-        console.log("Error deleting article: ", err);
-        result(err, null);
-      } else {
-        console.log("Successfully deleted article");
-        let responseMessage = {
-          message: "Successfully deleted article"
         };
         result(null, responseMessage);
       }
