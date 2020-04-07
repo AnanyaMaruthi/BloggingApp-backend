@@ -23,19 +23,31 @@ Follower.insertFollower = function(newFollower, result) {
   conn.query(`INSERT INTO followers SET ? `, newFollower, (err, res) => {
     if (err) {
       console.log("Error inserting follower: ", err);
-      let error = err;
+      let error = { message: true, message: err };
       if (err.code == "ER_NO_REFERENCED_ROW_2") {
         error = {
+          error: true,
           error: "Foreign key constraint fails"
+        };
+      } else if (err.code == "ER_BAD_NULL_ERROR") {
+        error = {
+          error: true,
+          message: "Required fields are empty"
+        };
+      } else if (err.code == "ER_DUP_ENTRY") {
+        error = {
+          error: true,
+          message: "Follower exists"
         };
       }
       result(error, null);
     } else {
-      let responseMessage = {
+      let response = {
+        error: false,
         message: "Successfully inserted follower"
       };
       console.log("Successfully inserted follower");
-      result(null, responseMessage);
+      result(null, response);
     }
   });
 };
@@ -49,11 +61,13 @@ Follower.deleteFollower = function(follower_id, user_id, result) {
         console.log("Error deleting follower: ", err);
         result(err, null);
       } else {
-        console.log("Successfully deleted follower");
-        let responseMessage = {
-          message: "Successfully deleted follower"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Follower not found", null);
+        } else {
+          console.log("Successfully deleted follower");
+          let response = "Successfully deleted follower";
+          result(null, response);
+        }
       }
     }
   );

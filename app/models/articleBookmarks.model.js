@@ -62,7 +62,7 @@ ArticleBookmark.addUserBookmark = function(newBookmark, result) {
     newBookmark,
     (err, res) => {
       if (err) {
-        let error = err;
+        let error = { error: true, message: err };
         if (err.code == "ER_NO_REFERENCED_ROW_2") {
           error = {
             error: true,

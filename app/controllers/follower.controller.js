@@ -15,14 +15,17 @@ exports.insertFollower = (req, res) => {
   };
   let newFollower = new Follower(data);
   Follower.insertFollower(newFollower, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
+    if (err) res.status(409).json(err);
+    else res.status(200).json(msg);
   });
 };
 
 exports.deleteFollower = (req, res) => {
   Follower.deleteFollower(req.userId, req.params.userId, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
+    if (err) {
+      if (err == "Follower not found")
+        res.status(404).json({ error: true, message: err });
+      else res.status(500).json({ error: true, message: err });
+    } else res.status(200).json({ error: false, message: msg });
   });
 };
