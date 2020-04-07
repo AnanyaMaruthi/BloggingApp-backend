@@ -26,6 +26,8 @@ ArticleBookmark.getUserBookmarks = function(my_user_id, result) {
               articles.title,
               articles.date_created,
               articles.image_path,
+              users.username,
+              users.profile_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
@@ -36,7 +38,9 @@ ArticleBookmark.getUserBookmarks = function(my_user_id, result) {
                     SELECT *
                     FROM   article_bookmarks
                     WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id 
+    ON        articles.article_id = ab.article_id,
+              users
+    WHERE     users.user_id = articles.user_id
     `,
     (err, res) => {
       if (err) {
