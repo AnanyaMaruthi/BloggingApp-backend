@@ -26,16 +26,15 @@ User.insertUser = function(newUser, result) {
       let error = err;
       if (err.code == "ER_DUP_ENTRY") {
         error = {
-          error: "Account for the given email ID already exists"
-        };
-      } else if (err.code == "ER_BAD_NULL_ERROR") {
-        error = {
-          error: "Required fields are empty"
+          error: true,
+          message: "Account for the given email ID already exists"
         };
       }
+
       result(error, null);
     } else {
       let responseMessage = {
+        error: false,
         message: "Successfully inserted user"
       };
       console.log("Successfully inserted user: ", newUser.email);

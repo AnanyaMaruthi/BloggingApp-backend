@@ -56,13 +56,15 @@ exports.findUserById = (req, res) => {
 };
 
 exports.insertUser = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({ error: "Request body empty" });
+  if (!req.body.email || req.body.username || req.bdy.password) {
+    res
+      .status(400)
+      .json({ error: true, message: "Required information is incomplete" });
   }
   let newUser = new User(req.body);
   User.insertUser(newUser, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
+    if (err) res.status(409).json(err);
+    else res.status(200).json(msg);
   });
 };
 
