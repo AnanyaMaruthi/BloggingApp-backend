@@ -461,8 +461,10 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
               articles.title,
               articles.date_created,
               articles.image_path,
-              case
-                        when ab.user_id IS NULL THEN false
+              users.username          AS author,
+              users.profile_image_url AS profille_image_url,
+              CASE
+                        WHEN ab.user_id IS NULL THEN false
                         ELSE true
               END AS is_bookmarked
     FROM      articles
@@ -471,8 +473,10 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
                     SELECT *
                     FROM   article_bookmarks
                     WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id 
-    WHERE     articles.user_id = ${my_user_id}
+    ON        articles.article_id = ab.article_id, 
+              users 
+    WHERE     articles.user_id = ${my_user_id} 
+    AND       articles.user_id = users.user_id
     `,
     (err, res) => {
       if (err) {
@@ -492,53 +496,61 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
 User.getUserFeed = function(my_user_id, result) {
   conn.query(
     `
-    SELECT    articles.article_id,
+    SELECT     articles.article_id,
               articles.user_id,
               articles.collection_id,
               articles.title,
               articles.date_created,
               articles.image_path,
-              case
-                        when ab.user_id IS NULL THEN false
-                        ELSE true
+              users.username          AS author,
+              users.profile_image_url AS profille_image_url,
+              CASE
+                          WHEN ab.user_id IS NULL THEN false
+                          ELSE true
               END AS is_bookmarked
-    FROM      articles
+    FROM       articles
     LEFT JOIN
               (
-                    SELECT *
-                    FROM   article_bookmarks
-                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab
-    ON        articles.article_id = ab.article_id
-    INNER JOIN
-              (
-                    SELECT collection_id
-                    FROM   collection_followers
-                    WHERE  collection_followers.user_id = ${my_user_id}) followers
-    ON        articles.collection_id = followers.collection_id
-    UNION
-    SELECT    articles.article_id,
-              articles.user_id,
-              articles.collection_id,
-              articles.title,
-              articles.date_created,
-              articles.image_path,
-              case
-                        when ab.user_id IS NULL THEN false
-                        ELSE true
-              END AS is_bookmarked
-    FROM      articles
-    LEFT JOIN
-              (
-                    SELECT *
-                    FROM   article_bookmarks
-                    WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id
-    INNER JOIN
-              (
-                    SELECT user_id
-                    FROM   followers
-                    WHERE  followers.follower_id = ${my_user_id}) followers 
-    ON        articles.user_id = followers.user_id
+                      SELECT *
+                      FROM   article_bookmarks
+                      WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON         articles.article_id = ab.article_id 
+    INNER JOIN 
+              ( 
+                      SELECT collection_id 
+                      FROM   collection_followers 
+                      WHERE  collection_followers.user_id = ${my_user_id}) followers 
+    ON         articles.collection_id = followers.collection_id, 
+              users 
+    WHERE      articles.user_id = users.user_id 
+    UNION 
+    SELECT     articles.article_id, 
+              articles.user_id, 
+              articles.collection_id, 
+              articles.title, 
+              articles.date_created, 
+              articles.image_path, 
+              users.username          AS author, 
+              users.profile_image_url AS profille_image_url, 
+              CASE 
+                          WHEN ab.user_id IS NULL THEN false 
+                          ELSE true 
+              END AS is_bookmarked 
+    FROM       articles 
+    LEFT JOIN 
+              ( 
+                      SELECT * 
+                      FROM   article_bookmarks 
+                      WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
+    ON         articles.article_id = ab.article_id 
+    INNER JOIN 
+              ( 
+                      SELECT user_id 
+                      FROM   followers 
+                      WHERE  followers.follower_id = ${my_user_id}) followers 
+    ON         articles.user_id = followers.user_id, 
+              users 
+WHERE      articles.user_id = users.user_id
     `,
     (err, res) => {
       if (err) {

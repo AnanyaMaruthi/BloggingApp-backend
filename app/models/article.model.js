@@ -63,6 +63,8 @@ Article.getAllArticles = function(my_user_id, result) {
               articles.title,
               articles.date_created,
               articles.image_path,
+              users.username as author,
+              users.profile_image_url as profille_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
@@ -73,7 +75,9 @@ Article.getAllArticles = function(my_user_id, result) {
                     SELECT *
                     FROM   article_bookmarks
                     WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id 
+    ON        articles.article_id = ab.article_id ,
+              users
+    WHERE     articles.user_id = users.user_id
     `,
     (err, res) => {
       if (err) {
@@ -97,18 +101,21 @@ Article.searchAllArticles = function(my_user_id, searchString, result) {
               articles.title,
               articles.date_created,
               articles.image_path,
+              users.username as author,
+              users.profile_image_url as profille_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
               END AS is_bookmarked
-    FROM      articles
+    FROM      users, articles
     LEFT JOIN
               (
                     SELECT *
                     FROM   article_bookmarks
                     WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id 
+    ON        articles.article_id = ab.article_id
     WHERE MATCH(title,tags) AGAINST ('${searchString}' IN NATURAL LANGUAGE MODE)
+    AND   articles.user_id = users.user_id
     `,
     (err, res) => {
       if (err) {
@@ -136,6 +143,8 @@ Article.findArticleById = function(my_user_id, article_id, result) {
               articles.date_created,
               articles.date_updated,
               articles.tags,
+              users.username as author,
+              users.profile_image_url as profille_image_url,
               CASE
                         WHEN ab.user_id IS NULL THEN false
                         ELSE true
@@ -150,8 +159,10 @@ Article.findArticleById = function(my_user_id, article_id, result) {
                     SELECT *
                     FROM   article_bookmarks
                     WHERE  article_bookmarks.user_id = ${my_user_id}) ab 
-    ON        articles.article_id = ab.article_id 
+    ON        articles.article_id = ab.article_id,
+              users
     WHERE articles.article_id = '${article_id}'
+    AND   articles.user_id = users.user_id
     `,
     (err, res) => {
       if (err) {
