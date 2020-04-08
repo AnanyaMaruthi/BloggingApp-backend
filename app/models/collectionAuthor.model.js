@@ -5,6 +5,67 @@ let CollectionAuthor = function(collectionAuthor) {
   this.author_id = collectionAuthor.author_id;
 };
 
+// Insert multiple
+CollectionAuthor.insertMultipleAuthors = function(authors, result) {
+  conn.query(
+    `INSERT INTO collection_authors VALUES ? `,
+    [authors],
+    (err, res) => {
+      if (err) {
+        console.log("Error inserting author: ", err);
+        let error = { error: true, message: err };
+        if (err.code == "ER_NO_REFERENCED_ROW_2") {
+          error = {
+            error: true,
+            message:
+              "Author Id or Collection ID does not exist. Foreign key constraint fails"
+          };
+        } else if (err.code == "ER_DUP_ENTRY") {
+          error = {
+            error: true,
+            message: "Author exists"
+          };
+        }
+        result(error, null);
+      } else {
+        let response = {
+          error: false,
+          message: "Successfully inserted authors"
+        };
+        console.log("Successfully inserted authors");
+        result(null, response);
+      }
+    }
+  );
+};
+
+// Delete multiple
+CollectionAuthor.deleteMultipleAuthors = function(
+  collection_id,
+  authors,
+  result
+) {
+  conn.query(
+    `
+    DELETE FROM collection_authors 
+    WHERE  collection_id = '${collection_id}' AND author_id IN ${authors}
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error deleting authors: ", err);
+        result({ error: true, message: err }, null);
+      } else {
+        console.log("Successfully deleted authors");
+        let response = {
+          error: false,
+          message: "Successfully deleted authors"
+        };
+        result(null, response);
+      }
+    }
+  );
+};
+
 // Insert author
 CollectionAuthor.insertAuthor = function(newCollectionAuthor, result) {
   conn.query(
@@ -31,35 +92,6 @@ CollectionAuthor.insertAuthor = function(newCollectionAuthor, result) {
   );
 };
 
-// Insert multiple
-CollectionAuthor.insertMultipleAuthors = function(authors, result) {
-  conn.query(
-    `INSERT INTO collection_authors VALUES ? `,
-    [authors],
-    (err, res) => {
-      if (err) {
-        console.log("Error inserting author: ", err);
-        let error = err;
-        if (
-          err.code == "ER_NO_REFERENCED_ROW_2" ||
-          err.code == "ER_DUP_ENTRY"
-        ) {
-          error = {
-            error: "Record exists"
-          };
-        }
-        result(error, null);
-      } else {
-        let responseMessage = {
-          message: "Successfully inserted authors"
-        };
-        console.log("Successfully inserted authors");
-        result(null, responseMessage);
-      }
-    }
-  );
-};
-
 // Delete author
 CollectionAuthor.deleteAuthor = function(collection_id, author_id, result) {
   conn.query(
@@ -72,33 +104,6 @@ CollectionAuthor.deleteAuthor = function(collection_id, author_id, result) {
         console.log("Error deleting author: ", err);
         result(err, null);
       } else {
-        console.log("Successfully deleted author");
-        let responseMessage = {
-          message: "Successfully deleted author"
-        };
-        result(null, responseMessage);
-      }
-    }
-  );
-};
-
-// Delete multiple
-CollectionAuthor.deleteMultipleAuthors = function(
-  collection_id,
-  authors,
-  result
-) {
-  conn.query(
-    `
-    DELETE FROM collection_authors 
-    WHERE  collection_id = '${collection_id}' AND author_id IN ${authors}
-    `,
-    (err, res) => {
-      if (err) {
-        console.log("Error deleting author: ", err);
-        result(err, null);
-      } else {
-        console.log(res);
         console.log("Successfully deleted author");
         let responseMessage = {
           message: "Successfully deleted author"

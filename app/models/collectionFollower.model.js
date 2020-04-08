@@ -13,7 +13,6 @@ CollectionFollower.getAll = function(result) {
       result(err, null);
     } else {
       console.log("Fetched all followers");
-      console.log(res);
       result(null, res);
     }
   });
@@ -44,19 +43,26 @@ CollectionFollower.insertFollower = function(newCollectionFollower, result) {
     (err, res) => {
       if (err) {
         console.log("Error inserting follower: ", err);
-        let error = err;
+        let error = { error: true, message: err };
         if (err.code == "ER_NO_REFERENCED_ROW_2") {
           error = {
-            error: "Foreign key constraint fails"
+            error: true,
+            message:
+              "Invalid user ID or collection ID. Foreign key constraint fails"
+          };
+        } else if (err.code == "ER_DUP_ENTRY") {
+          error = {
+            error: true,
+            message: "Follower exists"
           };
         }
         result(error, null);
       } else {
         let responseMessage = {
+          error: false,
           message: "Successfully inserted follower"
         };
         console.log("Successfully inserted follower");
-        console.log(res);
         result(null, responseMessage);
       }
     }
@@ -72,11 +78,13 @@ CollectionFollower.deleteFollower = function(collection_id, user_id, result) {
         console.log("Error deleting follower: ", err);
         result(err, null);
       } else {
-        console.log("Successfully deleted follower");
-        let responseMessage = {
-          message: "Successfully deleted follower"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Follower not found", null);
+        } else {
+          console.log("Deleted follower");
+          let response = "Successfully removed follower";
+          result(null, response);
+        }
       }
     }
   );

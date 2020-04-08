@@ -8,14 +8,14 @@ exports.getAllCollections = (req, res) => {
       req.userId,
       req.query.q,
       (err, collections) => {
-        if (err) res.json(err);
-        else res.json(collections);
+        if (err) res.status(500).json({ error: true, message: err });
+        else res.status(200).json({ error: false, collections: collections });
       }
     );
   } else {
     Collection.getAllCollections(req.userId, (err, collections) => {
-      if (err) res.json(err);
-      else res.json(collections);
+      if (err) res.status(500).json({ error: true, message: err });
+      else res.status(200).json({ error: false, collections: collections });
     });
   }
 };
@@ -45,10 +45,18 @@ exports.findCollectionById = (req, res) => {
 
   Promise.all([collectionQuery, authorQuery])
     .then(results => {
-      res.json({
-        collection: results[0],
-        authors: results[1]
-      });
+      if (results[0].length == 0) {
+        res.status(404).json({
+          error: true,
+          message: "Collection not found"
+        });
+      } else {
+        res.status(200).json({
+          error: false,
+          collection: results[0],
+          authors: results[1]
+        });
+      }
     })
     .catch(err => {
       res.send(err);
@@ -56,41 +64,53 @@ exports.findCollectionById = (req, res) => {
 };
 
 exports.insertCollection = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({ error: "Request body empty" });
-  }
-  let newCollection = new Collection(req.body);
-
-  newCollection.user_id = req.userId;
-  if (req.image_path) {
-    newCollection.image_url = req.image_path;
+  if (
+    !req.body.collection_id ||
+    !req.body.collection_name ||
+    !req.body.description ||
+    !req.body.image_url
+  ) {
+    res.status(400).json({ error: true, message: "Required fields are empty" });
   } else {
-    newCollection.image_url = "";
+    let newCollection = new Collection(req.body);
+    newCollection.user_id = req.userId;
+    if (req.image_path) {
+      newCollection.image_url = req.image_path;
+    } else {
+      newCollection.image_url = "";
+    }
+    Collection.insertCollection(newCollection, (err, msg) => {
+      if (err) res.status(409).json(err);
+      else res.status(200).json(msg);
+    });
   }
-  Collection.insertCollection(newCollection, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
 };
 
 exports.updateCollection = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({ error: "Request body empty" });
-  }
-  let collection = new Collection(req.body);
-  if (req.image_path) {
-    collection.image_url = req.image_path;
-  }
-  console.log(collection);
-  Collection.patchCollection(
-    req.userId,
-    req.params.collectionId,
-    collection,
-    (err, msg) => {
-      if (err) res.json(err);
-      else res.json(msg);
+  if (
+    !req.body.collection_name ||
+    !req.body.description ||
+    !req.body.image_url
+  ) {
+    res.status(400).json({ error: true, message: "Required fields are empty" });
+  } else {
+    let collection = new Collection(req.body);
+    if (req.image_path) {
+      collection.image_url = req.image_path;
     }
-  );
+    Collection.patchCollection(
+      req.userId,
+      req.params.collectionId,
+      collection,
+      (err, msg) => {
+        if (err) {
+          if (err == "Collection not found")
+            res.status(404).json({ error: true, message: err });
+          else res.status(500).json({ error: true, message: err });
+        } else res.status(200).json({ error: false, message: msg });
+      }
+    );
+  }
 };
 
 exports.deleteCollection = (req, res) => {
@@ -98,33 +118,33 @@ exports.deleteCollection = (req, res) => {
     req.userId,
     req.params.collectionId,
     (err, msg) => {
-      if (err) res.json(err);
-      else res.json(msg);
+      if (err) {
+        if (err == "Collection not found") {
+          res.status(404).json({ error: true, message: err });
+        } else {
+          res.status(500).json({ error: true, message: err });
+        }
+      } else res.status(200).json({ error: false, message: msg });
     }
   );
 };
 
 exports.getCollectionArticles = (req, res) => {
-  Collection.getArticles(req.userId, req.params.collectionId, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
-};
-
-// Get all collection followers data
-exports.getAll = (req, res) => {
-  console.log("lala");
-  CollectionFollower.getAll((err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
+  Collection.getArticles(
+    req.userId,
+    req.params.collectionId,
+    (err, articles) => {
+      if (err) res.status(500).json({ error: true, message: err });
+      else res.status(200).json({ error: false, articles: articles });
+    }
+  );
 };
 
 // Get followers of a collection
 exports.getFollowers = (req, res) => {
   CollectionFollower.getFollowers(req.params.collectionId, (err, followers) => {
-    if (err) res.json(err);
-    else res.json(followers);
+    if (err) res.staus(500).json(err);
+    else res.status(200).json(followers);
   });
 };
 
@@ -136,8 +156,8 @@ exports.insertFollower = (req, res) => {
   };
   let newCollectionFollower = new CollectionFollower(data);
   CollectionFollower.insertFollower(newCollectionFollower, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
+    if (err) res.status(409).json(err);
+    else res.status(200).json(msg);
   });
 };
 
@@ -147,8 +167,45 @@ exports.deleteFollower = (req, res) => {
     req.params.collectionId,
     req.userId,
     (err, msg) => {
-      if (err) res.json(err);
-      else res.json(msg);
+      if (err) {
+        if (err == "Follower not found")
+          res.status(404).json({ error: true, message: err });
+        else res.status(500).json({ error: true, message: err });
+      } else res.status(200).json({ error: false, message: msg });
+    }
+  );
+};
+
+// Add multiple authors
+exports.addMultipleAuthors = (req, res) => {
+  if (!req.body.authors) {
+    res.status(400).json({ error: true, message: "Authors not specified" });
+  } else {
+    let data = [];
+    for (author_id of req.body.authors) {
+      data.push([req.params.collectionId, author_id]);
+    }
+    CollectionAuthor.insertMultipleAuthors(data, (err, msg) => {
+      if (err) res.status(409).json(err);
+      else res.status(200).json(msg);
+    });
+  }
+};
+
+// Delete multiple author
+exports.deleteMultipleAuthors = (req, res) => {
+  if (!req.body.authors) {
+    res.status(400).json({ error: "Authors not specified" });
+  }
+  let authors = req.body.authors.join(",");
+  authors = "(" + authors + ")";
+  console.log(authors);
+  CollectionAuthor.deleteMultipleAuthors(
+    req.params.collectionId,
+    authors,
+    (err, msg) => {
+      if (err) res.status(500).json(err);
+      else res.status(200).json(msg);
     }
   );
 };
@@ -166,43 +223,11 @@ exports.addAuthor = (req, res) => {
   });
 };
 
-// Add multiple authors
-exports.addMultipleAuthors = (req, res) => {
-  if (!req.body.authors) {
-    res.status(400).json({ error: "Authors not specified" });
-  }
-  let data = [];
-  for (author_id of req.body.authors) {
-    data.push([req.params.collectionId, author_id]);
-  }
-  CollectionAuthor.insertMultipleAuthors(data, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
-};
-
 // Delete author
 exports.deleteAuthor = (req, res) => {
   CollectionAuthor.deleteAuthor(
     req.params.collectionId,
     req.params.authorId,
-    (err, msg) => {
-      if (err) res.json(err);
-      else res.json(msg);
-    }
-  );
-};
-
-// Delete multiple author
-exports.deleteMultipleAuthors = (req, res) => {
-  if (!req.body.authors) {
-    res.status(400).json({ error: "Authors not specified" });
-  }
-  let authors = req.body.authors.join(",");
-  authors = "(" + authors + ")";
-  CollectionAuthor.deleteMultipleAuthors(
-    req.params.collectionId,
-    authors,
     (err, msg) => {
       if (err) res.json(err);
       else res.json(msg);

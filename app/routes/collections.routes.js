@@ -8,10 +8,6 @@ let routes = app => {
     .get(auth, collectionController.getAllCollections)
     .post(auth, upload.single("image"), collectionController.insertCollection);
 
-  // Delete later
-  // Get all data in user_collections table
-  app.route("/api/v1/collections/followers").get(collectionController.getAll);
-
   app
     .route("/api/v1/collections/:collectionId")
     .get(auth, collectionController.findCollectionById)

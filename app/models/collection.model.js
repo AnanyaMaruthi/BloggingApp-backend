@@ -14,30 +14,34 @@ Collection.insertCollection = function(newCollection, result) {
   conn.query(`INSERT INTO collections SET ? `, newCollection, (err, res) => {
     if (err) {
       console.log("Error inserting collection: ", err);
-      let error = err;
+      let error = { error: true, message: err };
       if (err.code == "ER_DUP_ENTRY") {
         error = {
-          error: "Collection ID exists"
+          error: true,
+          message: "Collection ID exists"
         };
       } else if (err.code == "ER_BAD_NULL_ERROR") {
         error = {
-          error: "Required fields are empty"
+          error: true,
+          message: "Required fields are empty"
         };
       } else if (err.code == "ER_NO_REFERENCED_ROW_2") {
         error = {
-          error: "Invalid user ID. Foreign key constraint fails"
+          error: true,
+          message: "Invalid user ID. Foreign key constraint fails"
         };
       }
       result(error, null);
     } else {
-      let responseMessage = {
+      let response = {
+        error: false,
         message: "Successfully inserted collection"
       };
       console.log(
         "Successfully inserted collection: ",
         newCollection.collection_name
       );
-      result(null, responseMessage);
+      result(null, response);
     }
   });
 };
@@ -232,11 +236,15 @@ Collection.patchCollection = function(
         console.log("Error while updating: ", err);
         result(err, null);
       } else {
-        console.log("Successfully updated collection");
-        let responseMessage = {
-          message: "Successfully updated collection"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Collection not found", null);
+        } else {
+          console.log("Successfully updated collection");
+          let response = {
+            message: "Successfully updated collection"
+          };
+          result(null, response);
+        }
       }
     }
   );
@@ -255,11 +263,15 @@ Collection.deleteCollection = function(my_user_id, collection_id, result) {
         console.log("Error deleting collection: ", err);
         result(err, null);
       } else {
-        console.log("Successfully deleted collection");
-        let responseMessage = {
-          message: "Successfully deleted collection"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("Collection not found", null);
+        } else {
+          console.log("Successfully deleted collection");
+          let response = {
+            message: "Successfully deleted collection"
+          };
+          result(null, response);
+        }
       }
     }
   );
