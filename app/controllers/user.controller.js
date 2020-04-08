@@ -27,6 +27,8 @@ exports.getAllUsers = (req, res) => {
 exports.getUserProfile = (req, res) => {
   User.getUserProfile(req.userId, (err, user) => {
     if (err) res.status(500).json({ error: true, message: err });
+    else if (user.length == 0)
+      res.status(404).json({ error: true, message: "User not found" });
     else res.status(200).json({ error: false, user: user[0] });
   });
 };
@@ -50,7 +52,11 @@ exports.changePassword = (req, res) => {
 exports.findUserById = (req, res) => {
   User.findUserById(req.userId, req.params.userId, (err, user) => {
     if (err) res.status(500).json({ error: true, message: err });
-    else res.status(200).json({ error: false, user: user[0] });
+    else {
+      if (user.length == 0)
+        res.status(500).json({ error: true, message: "User not found" });
+      else res.status(200).json({ error: false, user: user[0] });
+    }
   });
 };
 
@@ -84,16 +90,22 @@ exports.updateUser = (req, res) => {
     console.log(data);
     let user = new User(data);
     User.patchUser(req.userId, user, (err, msg) => {
-      if (err) res.status(500).json(err);
-      else res.status(200).json(msg);
+      if (err) {
+        if (err == "User not found")
+          res.status(404).json({ error: true, message: err });
+        else res.status(500).json({ error: true, message: err });
+      } else res.status(200).json(msg);
     });
   }
 };
 
 exports.deleteUser = (req, res) => {
   User.deleteUser(req.userId, (err, msg) => {
-    if (err) res.status(500).json(err);
-    else res.status(200).json(msg);
+    if (err) {
+      if (err == "User not found")
+        res.status(404).json({ error: true, message: err });
+      else res.status(500).json({ error: true, message: err });
+    } else res.status(200).json(msg);
   });
 };
 

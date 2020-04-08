@@ -25,11 +25,16 @@ User.insertUser = function(newUser, result) {
     (err, res) => {
       if (err) {
         console.log("Error inserting user: ", err);
-        let error = err;
+        let error = { error: true, message: err };
         if (err.code == "ER_DUP_ENTRY") {
           error = {
             error: true,
             message: "Account for the given email ID already exists"
+          };
+        } else if (err.code == "ER_BAD_NULL_ERROR") {
+          error = {
+            error: true,
+            message: "Required fields are empty"
           };
         }
         result(error, null);
@@ -51,7 +56,7 @@ User.login = function(email, password, result) {
       // Sql error
       if (err) {
         console.log("Error login ", err);
-        result(err, null);
+        result({ error: true, message: err }, null);
       } else {
         // Email not found
         if (res.length != 1) {
@@ -214,7 +219,7 @@ User.changePassword = function(my_user_id, old_password, new_password, result) {
     (err, res) => {
       if (err) {
         console.log(err);
-        result(err, null);
+        result({ error: true, message: err }, null);
       } else if (res.length == 0) {
         console.log("User not found");
         result({ error: true, message: "Invalid user" }, null);
@@ -298,8 +303,6 @@ User.findUserById = function(my_user_id, user_id, result) {
   );
 };
 
-// Get user by email
-
 // Patch user
 User.patchUser = function(my_user_id, user, result) {
   conn.query(
@@ -313,14 +316,15 @@ User.patchUser = function(my_user_id, user, result) {
     (err, res) => {
       if (err) {
         console.log("Error while updating: ", err);
-        result({ error: true, message: err }, null);
+        result(err, null);
       } else {
-        console.log("Successfully updated user");
-        let responseMessage = {
-          error: false,
-          message: "Successfully updated user"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("User not found", null);
+        } else {
+          console.log("Successfully updated user");
+          let response = "Successfully updated user";
+          result(null, response);
+        }
       }
     }
   );
@@ -336,14 +340,15 @@ User.deleteUser = function(my_user_id, result) {
     (err, res) => {
       if (err) {
         console.log("Error deleting user: ", err);
-        result({ error: true, message: err }, null);
+        result(err, null);
       } else {
-        console.log("Successfully deleted user");
-        let responseMessage = {
-          error: false,
-          message: "Successfully deleted user"
-        };
-        result(null, responseMessage);
+        if (res.affectedRows == 0) {
+          result("User not found", null);
+        } else {
+          console.log("Successfully deleted user");
+          let response = "Successfully deleted user";
+          result(null, response);
+        }
       }
     }
   );
