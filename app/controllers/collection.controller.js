@@ -53,7 +53,7 @@ exports.findCollectionById = (req, res) => {
       } else {
         res.status(200).json({
           error: false,
-          collection: results[0],
+          collection: results[0][0],
           authors: results[1]
         });
       }
