@@ -71,7 +71,7 @@ Article.getAllArticles = function(my_user_id, result) {
               articles.date_created,
               articles.image_path,
               users.username as author,
-              users.profile_image_url as profille_image_url,
+              users.profile_image_url as profile_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
@@ -109,7 +109,7 @@ Article.searchAllArticles = function(my_user_id, searchString, result) {
               articles.date_created,
               articles.image_path,
               users.username as author,
-              users.profile_image_url as profille_image_url,
+              users.profile_image_url as profile_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true
@@ -151,7 +151,7 @@ Article.findArticleById = function(my_user_id, article_id, result) {
               articles.date_updated,
               articles.tags,
               users.username as author,
-              users.profile_image_url as profille_image_url,
+              users.profile_image_url as profile_image_url,
               CASE
                         WHEN ab.user_id IS NULL THEN false
                         ELSE true

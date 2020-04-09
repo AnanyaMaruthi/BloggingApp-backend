@@ -474,7 +474,7 @@ User.getUserAuthoredArticles = function(my_user_id, result) {
               articles.date_created,
               articles.image_path,
               users.username          AS author,
-              users.profile_image_url AS profille_image_url,
+              users.profile_image_url AS profile_image_url,
               CASE
                         WHEN ab.user_id IS NULL THEN false
                         ELSE true
@@ -515,7 +515,7 @@ User.getUserFeed = function(my_user_id, result) {
               articles.date_created,
               articles.image_path,
               users.username          AS author,
-              users.profile_image_url AS profille_image_url,
+              users.profile_image_url AS profile_image_url,
               CASE
                           WHEN ab.user_id IS NULL THEN false
                           ELSE true
@@ -543,7 +543,7 @@ User.getUserFeed = function(my_user_id, result) {
               articles.date_created, 
               articles.image_path, 
               users.username          AS author, 
-              users.profile_image_url AS profille_image_url, 
+              users.profile_image_url AS profile_image_url, 
               CASE 
                           WHEN ab.user_id IS NULL THEN false 
                           ELSE true 
