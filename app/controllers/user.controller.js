@@ -94,7 +94,7 @@ exports.updateUser = (req, res) => {
         if (err == "User not found")
           res.status(404).json({ error: true, message: err });
         else res.status(500).json({ error: true, message: err });
-      } else res.status(200).json(msg);
+      } else res.status(200).json({ error: false, message: msg });
     });
   }
 };
