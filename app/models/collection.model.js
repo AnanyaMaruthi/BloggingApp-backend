@@ -226,8 +226,8 @@ Collection.patchCollection = function(
     `
     UPDATE collections
     SET    description = '${collection.description}', 
-           image_url = '${collection.image_url}',
-           tags = '${collection.tags}'
+           image_url = '${collection.image_url}'
+          --  tags = '${collection.tags}'
     WHERE  collection_id = '${collection_id}' 
     AND    user_id = ${my_user_id}
     `,

@@ -87,11 +87,7 @@ exports.insertCollection = (req, res) => {
 };
 
 exports.updateCollection = (req, res) => {
-  if (
-    !req.body.collection_name ||
-    !req.body.description ||
-    !req.body.image_url
-  ) {
+  if (!req.body.description || !req.body.image_url) {
     res.status(400).json({ error: true, message: "Required fields are empty" });
   } else {
     let collection = new Collection(req.body);
