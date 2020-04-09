@@ -59,7 +59,7 @@ exports.findCollectionById = (req, res) => {
       }
     })
     .catch(err => {
-      res.send(err);
+      res.status(500).json({ error: true, message });
     });
 };
 
