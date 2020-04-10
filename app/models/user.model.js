@@ -20,7 +20,7 @@ let User = function(user) {
 User.insertUser = function(newUser, result) {
   let passwordHash = bcrypt.hashSync(newUser.password, saltRounds);
   conn.query(
-    `INSERT INTO users (username, email, password) VALUES ( ?, ?, ? ) `,
+    `INSERT INTO users (username, email, password, profile_image_url) VALUES ( ?, ?, ?, " " ) `,
     [newUser.username, newUser.email, passwordHash],
     (err, res) => {
       if (err) {
