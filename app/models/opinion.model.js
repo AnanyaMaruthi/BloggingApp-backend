@@ -9,8 +9,16 @@ let Opinion = function(opinion) {
 // get all opinions for an article
 Opinion.getAllOpinions = function(article_id, result) {
     conn.query(` 
-        SELECT * FROM opinions
-        WHERE is_reply = 'false' AND
+        SELECT 
+        opinions.opinion_id,
+        opinions.article_id,
+        opinions.content,
+        opinions.date_created,
+        users.username as username,
+        users.profile_image_url as profile_image_url
+        FROM opinions,users 
+        WHERE is_reply = 0 AND
+        opinions.user_id= users.user_id AND
         opinion_id IN
         (SELECT opinion_id from opinions 
             WHERE article_id = '${article_id}') `,
@@ -57,7 +65,7 @@ Opinion.insertOpinion = function(newOpinion, result) {
 // view replies for an opinion
 Opinion.getAllReplies = function(opinion_id, article_id, result) {
     conn.query(` SELECT * FROM opinions 
-    WHERE is-reply = 'true' AND article_id = ${article_id}
+    WHERE is_reply = 'true' AND article_id = ${article_id}
     AND
     opinion_id IN 
     (SELECT reply_id FROM opinion_replies
