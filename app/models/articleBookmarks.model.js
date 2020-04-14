@@ -26,8 +26,8 @@ ArticleBookmark.getUserBookmarks = function(my_user_id, result) {
               articles.title,
               articles.date_created,
               articles.image_path,
-              users.username,
-              users.profile_image_url,
+              users.username as author,
+              users.profile_image_url as profile_image_url,
               case
                         when ab.user_id IS NULL THEN false
                         ELSE true

@@ -17,6 +17,8 @@ const Article = function(article) {
 
 // Insert Article
 Article.insertArticle = function(newArticle, result) {
+  console.log("newwwwwwwwwwwwwwwwwwwwwwww");
+  console.log(newArticle.content);
   conn.query(
     `
     INSERT INTO articles 
@@ -188,14 +190,20 @@ Article.patchArticle = function(my_user_id, article_id, article, result) {
   conn.query(
     `
     UPDATE articles
-    SET   collection_id='${article.collection_id}', 
-          title='${article.title}', 
-          content='${article.content}', 
-          image_path='${article.image_path}', 
-          date_updated='${article.date_updated}',
-          tags='${article.tags}'
+    SET   title= ?, 
+          content= ? , 
+          image_path= ?, 
+          date_updated= ?,
+          tags=?
     WHERE  article_id='${article_id}' and user_id = ${my_user_id}
     `,
+    [
+      article.title,
+      article.content,
+      article.image_path,
+      article.date_updated,
+      article.tags
+    ],
     (err, res) => {
       if (err) {
         let error = err;

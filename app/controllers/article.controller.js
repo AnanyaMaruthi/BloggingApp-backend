@@ -53,12 +53,7 @@ exports.insertArticle = (req, res) => {
 };
 
 exports.updateArticle = (req, res) => {
-  if (
-    !req.body.collection_id ||
-    !req.body.title ||
-    !req.body.content ||
-    !req.body.image_path
-  ) {
+  if (!req.body.title || !req.body.content || !req.body.image_path) {
     res.status(400).json({ error: true, message: "Required fields empty" });
   } else {
     let article = new Article(req.body);
