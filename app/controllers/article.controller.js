@@ -38,7 +38,9 @@ exports.insertArticle = (req, res) => {
   ) {
     res.status(400).json({ error: true, message: "Required fields are empty" });
   } else {
+    print(req.body);
     let newArticle = new Article(req.body);
+    print(req.userId);
     newArticle.user_id = req.userId;
     if (req.image_path) {
       newArticle.image_path = req.image_path;

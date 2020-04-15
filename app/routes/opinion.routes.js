@@ -9,7 +9,7 @@ let routes = app => {
     app
         .route("/api/v1/article/:articleid/opinions/:opinionId")
         .get(opinionController.getAllReplies);
-    
+
 };
 
 module.exports = routes;

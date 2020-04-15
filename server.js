@@ -8,6 +8,7 @@ const articleRoutes = require("./app/routes/articles.routes");
 const followerRoutes = require("./app/routes/followers.routes");
 const loginRoutes = require("./app/routes/login.routes");
 const searchRoutes = require("./app/routes/search.routes");
+const opinionRoutes = require("./app/routes/opinion.routes");
 
 const upload = require("./app/middleware/uploads");
 const auth = require("./app/middleware/auth");
@@ -44,7 +45,9 @@ collectionRoutes(app);
 articleRoutes(app);
 followerRoutes(app);
 searchRoutes(app);
+opinionRoutes(app);
 
-app.listen(3000, () => {
+
+app.listen(3000, "192.168.0.106", () => {
   console.log("Server is running on port 3000.");
 });

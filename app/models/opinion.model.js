@@ -1,9 +1,13 @@
-let conn = require("./connection");
+const conn = require("./connection");
 
-let Opinion = function(opinion) {
+const Opinion = function(opinion) {
+  this.opinion_id = opinion.opinion_id;
   this.user_id = opinion.user_id;
   this.article_id = opinion.article_id;
   this.opinion_id = opinion.opinion_id;
+  this.content = opinion.content;
+  this.date_created = opinion.date_created;
+  this.is_reply = opinion.is_reply;
 };
 
 // get all opinions for an article
@@ -65,7 +69,7 @@ Opinion.insertOpinion = function(newOpinion, result) {
 // view replies for an opinion
 Opinion.getAllReplies = function(opinion_id, article_id, result) {
     conn.query(` SELECT * FROM opinions 
-    WHERE is_reply = 'true' AND article_id = ${article_id}
+    WHERE is_reply = 1 AND article_id = ${article_id}
     AND
     opinion_id IN 
     (SELECT reply_id FROM opinion_replies
@@ -73,10 +77,10 @@ Opinion.getAllReplies = function(opinion_id, article_id, result) {
     ) `,
     (err, res) => {
       if (err) {
-        console.log("Error fetching followers: ", err);
+        console.log("Error fetching replies: ", err);
         result(err, null);
       } else {
-        console.log("Fetched all followers");
+        console.log("Fetched all replies");
         result(null, res);
       }
     }

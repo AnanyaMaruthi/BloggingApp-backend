@@ -39,6 +39,7 @@ User.insertUser = function(newUser, result) {
         }
         result(error, null);
       } else {
+	console.log("Signed in");
         User.login(newUser.email, newUser.password, result);
       }
     }
@@ -84,6 +85,7 @@ User.login = function(email, password, result) {
               login: true,
               token: token
             };
+		console.log("Logged in");
             console.log(payload);
             console.log(token);
             result(null, msg);
