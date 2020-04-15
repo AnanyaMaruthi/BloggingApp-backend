@@ -21,7 +21,9 @@ exports.insertOpinion = (req, res) => {
 
   //Add authorization for user id, now it is coming from body
   let newOpinion = new Opinion(req.body);
+  console.log(req.userId);
   newOpinion["article_id"] = req.params.articleid;
+  newOpinion["user_id"] = req.userId;
   Opinion.insertOpinion(newOpinion, (err, msg) => {
     if (err) res.json(err);
     else res.json(msg);
