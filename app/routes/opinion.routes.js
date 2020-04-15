@@ -1,14 +1,15 @@
 let opinionController = require("../controllers/opinion.controller");
+let auth = require("../middleware/auth");
 
 let routes = app => {
     app
         .route("/api/v1/article/:articleid/opinions")
-        .get(opinionController.getAllOpinions)
-        .post(opinionController.insertOpinion);
+        .get(auth, opinionController.getAllOpinions)
+        .post(auth, opinionController.insertOpinion);
 
     app
         .route("/api/v1/article/:articleid/opinions/:opinionId")
-        .get(opinionController.getAllReplies);
+        .get(auth, opinionController.getAllReplies);
 
 };
 
