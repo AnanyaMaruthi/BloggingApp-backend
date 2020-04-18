@@ -47,11 +47,19 @@ Opinion.insertOpinion = function(newOpinion, result) {
       newOpinion,
       (err, res) => {
         if (err) {
-          console.log("Error inserting opinion: ", err);
-          let error = err;
+          let error = {
+            error: true,
+            message: err
+          };
+          console.log("Error inserting opinion: ");
           if (err.code == "ER_NO_REFERENCED_ROW_2") {
             error = {
               error: "Foreign key constraint fails"
+            };
+          }else if (err.code == "ER_BAD_NULL_ERROR") {
+            error = {
+              error: true,
+              message: "Required fields are empty"
             };
           }
           result(error, null);

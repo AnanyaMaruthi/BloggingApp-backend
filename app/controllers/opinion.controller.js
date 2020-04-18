@@ -13,21 +13,22 @@ exports.getAllOpinions = (req, res) => {
 };
 
 exports.insertOpinion = (req, res) => {
-  if (!req.body) {
-    res.status(400).json({ error: "Request body empty" });
-  }
-  console.log(req.body);
-  console.log(req.params.articleid)
+  if (!req.body.content || !req.body.date_created || !req.body.is_reply) {
+    res.status(400).json({ error: true, message :  "Content body is empty" });
+  }else{
+    console.log(req.body);
+    console.log(req.params.articleid)
 
-  //Add authorization for user id, now it is coming from body
-  let newOpinion = new Opinion(req.body);
-  console.log(req.userId);
-  newOpinion["article_id"] = req.params.articleid;
-  newOpinion["user_id"] = req.userId;
-  Opinion.insertOpinion(newOpinion, (err, msg) => {
-    if (err) res.json(err);
-    else res.json(msg);
-  });
+    //Add authorization for user id, now it is coming from body
+    let newOpinion = new Opinion(req.body);
+    console.log(req.userId);
+    newOpinion["article_id"] = req.params.articleid;
+    newOpinion["user_id"] = req.userId;
+    Opinion.insertOpinion(newOpinion, (err, msg) => {
+      if (err) res.status(409).json(err);
+      else res.status(200).json(msg);
+    });
+  }
 };
 
 exports.getAllReplies = (req, res) => {
