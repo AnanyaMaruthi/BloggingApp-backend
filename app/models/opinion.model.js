@@ -19,6 +19,7 @@ Opinion.getAllOpinions = function(article_id, result) {
         opinions.content,
         opinions.date_created,
         users.username as username,
+        users.user_id as user_id,
         users.profile_image_url as profile_image_url
         FROM opinions,users 
         WHERE is_reply = 0 AND
@@ -90,6 +91,31 @@ Opinion.getAllReplies = function(opinion_id, article_id, result) {
       } else {
         console.log("Fetched all replies");
         result(null, res);
+      }
+    }
+  );
+};
+
+//delete opinion
+Opinion.deleteOpinion = function(opinion_id, article_id, result) {
+  conn.query(
+    `
+    DELETE FROM opinions 
+    WHERE  opinion_id = '${opinion_id}' and
+    article_id = '${article_id}'
+    `,
+    (err, res) => {
+      if (err) {
+        console.log("Error deleting opinion: ", err);
+        result(err, null);
+      } else {
+        if (res.affectedRows == 0) {
+          result("opinion not found", null);
+        } else {
+          console.log("Successfully deleted opinion");
+          let response = "Successfully deleted opinion";
+          result(null, response);
+        }
       }
     }
   );

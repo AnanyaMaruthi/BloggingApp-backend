@@ -9,7 +9,8 @@ let routes = app => {
 
     app
         .route("/api/v1/article/:articleid/opinions/:opinionId")
-        .get(auth, opinionController.getAllReplies);
+        .get(auth, opinionController.getAllReplies)
+        .delete(auth, opinionController.deleteOpinion);
 
 };
 

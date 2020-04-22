@@ -43,3 +43,14 @@ exports.getAllReplies = (req, res) => {
   );
 };
 
+exports.deleteOpinion = (req, res) => {
+  Article.deleteOpinion(req.params.opinionId,req.params.articleId, (err, msg) => {
+    if (err) {
+      if (err == "Opinion not found") {
+        res.status(404).json({ error: true, message: err });
+      } else {
+        res.status(500).json({ error: true, message: err });
+      }
+    } else res.status(200).json({ error: false, message: msg });
+  });
+};
